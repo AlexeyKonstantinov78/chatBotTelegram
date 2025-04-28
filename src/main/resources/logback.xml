@@ -1,0 +1,48 @@
+<configuration>
+    <!-- Имя файла логов -->
+    <property name="LOG_FILE" value="logs/application.log"/>
+
+    <!-- Автоматическое создание папки если её нет -->
+    <!--    <if condition='!property("LOG_DIR").equals("")'>-->
+    <!--        <then>-->
+    <!--            <mkdir dir="${LOG_DIR}"/>-->
+    <!--        </then>-->
+    <!--    </if>-->
+
+    <!-- Паттерн вывода логов -->
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"/>
+
+    <!-- Вывод в консоль -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Вывод в файл с ротацией по размеру -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE}</file>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+
+        <!-- Политика ротации -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- Имя архивированного файла (с номером и датой) -->
+            <fileNamePattern>${LOG_FILE}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- Максимальный размер одного файла -->
+            <maxFileSize>10MB</maxFileSize>
+            <!-- Максимальное количество архивных файлов -->
+            <maxHistory>30</maxHistory>
+            <!-- Общий максимальный размер всех логов -->
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Уровень логирования и appender'ы -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+
+</configuration>
