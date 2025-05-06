@@ -1,5 +1,7 @@
 package ru.alekseykonstantinov;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
@@ -21,7 +23,7 @@ public class MyBot implements LongPollingSingleThreadUpdateConsumer {
     @Override
     public void consume(List<Update> updates) {
         LongPollingSingleThreadUpdateConsumer.super.consume(updates);
-        log.info("List: " + updates.toString());
+        log.info(toPrettyJson(updates));
     }
 
     @Override
@@ -40,9 +42,19 @@ public class MyBot implements LongPollingSingleThreadUpdateConsumer {
         try {
             // Execute it
             telegramClient.execute(sendMessage);
+            log.info("Отправлено сообщение: " + msg);
         } catch (TelegramApiException e) {
             log.error("Ошибка отправки сообщения: " + e.getMessage());
         }
+    }
+
+    public void printUpdate(List<Update> updates) {
+        System.out.println(updates.get(0));
+    }
+
+    public String toPrettyJson(List<Update> updates) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return gson.toJson(updates);
     }
 }
 
