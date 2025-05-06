@@ -17,12 +17,12 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        log.info(TOKEN);
+
         try {
             // Instantiate Telegram Bots API
             TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication();
             // TODO Register our bot
-            botsApplication.registerBot(TOKEN, new MyBot());
+            botsApplication.registerBot(TOKEN, new MyBot(TOKEN));
         } catch (TelegramApiException e) {
             log.error("TelegramApiException: " + e.getMessage());
             e.printStackTrace();
