@@ -15,10 +15,22 @@
     </properties>
 
     <dependencies>
+        <!--        <dependency>-->
+        <!--            <groupId>org.telegram</groupId>-->
+        <!--            <artifactId>telegrambots</artifactId>-->
+        <!--            <version>6.9.7.1</version>-->
+        <!--        </dependency>-->
+
         <dependency>
             <groupId>org.telegram</groupId>
-            <artifactId>telegrambots</artifactId>
-            <version>6.9.7.1</version>
+            <artifactId>telegrambots-longpolling</artifactId>
+            <version>8.3.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.telegram</groupId>
+            <artifactId>telegrambots-client</artifactId>
+            <version>8.3.0</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
