@@ -42,7 +42,7 @@ public class MyBot implements LongPollingSingleThreadUpdateConsumer {
         try {
             // Execute it
             telegramClient.execute(sendMessage);
-            log.info("Отправлено сообщение: " + msg);
+            log.info("chatId: " + chatId + "; Отправлено сообщение: " + msg);
         } catch (TelegramApiException e) {
             log.error("Ошибка отправки сообщения: " + e.getMessage());
         }
