@@ -7,6 +7,7 @@ import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
@@ -31,9 +32,42 @@ public class MyBot implements LongPollingSingleThreadUpdateConsumer {
         log.info(update.toString());
         if (update.hasMessage() && update.getMessage().hasText()) {
             String message = update.getMessage().getText();
-            log.info(message);
+            log.info("Получено сообщение: " + message);
+            //Long chatId = update.getMessage().getChatId();
+            //sendMessageGetChatId(chatId, message);
+        }
+
+        if (update.hasMessage() && !update.getMessage().getNewChatMembers().isEmpty()) {
+            StringBuilder sb = new StringBuilder();
             Long chatId = update.getMessage().getChatId();
-            sendMessageGetChatId(chatId, message);
+            update.getMessage().getNewChatMembers().stream().forEach(User -> {
+                sb.append("id: " + User.getId() + " ");
+                sb.append("firstName: " + User.getFirstName() + " ");
+                sb.append("isBot: " + User.getIsBot() + " ");
+                sb.append("userName: " + User.getUserName() + " ");
+
+                String message = String.format(
+                        "@%1s Привет %2s Добро пожаловать в группу ",
+                        User.getUserName(),
+                        User.getFirstName()
+                );
+                sendMessageGetChatId(chatId, message);
+            });
+            log.info("Новый пользователь метод update.getMessage().getNewChatMembers() " + sb.toString());
+
+        }
+
+        // при удалении из участника
+        if (update.hasMessage() && update.getMessage().getLeftChatMember() != null) {
+            StringBuilder sb = new StringBuilder();
+            User leftChatMember = update.getMessage().getLeftChatMember();
+
+            sb.append("id: " + leftChatMember.getId() + " ");
+            sb.append("firstName: " + leftChatMember.getFirstName() + " ");
+            sb.append("isBot: " + leftChatMember.getIsBot() + " ");
+            sb.append("userName: " + leftChatMember.getUserName() + " ");
+
+            log.info("Пользователь удален из участников метод update.getMessage().getLeftChatMember() != null " + sb.toString());
         }
     }
 
