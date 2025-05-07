@@ -15,10 +15,10 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 import java.util.List;
 
 @Slf4j
-public class MyBot implements LongPollingSingleThreadUpdateConsumer {
+public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
     TelegramClient telegramClient;
 
-    public MyBot(String TOKEN) {
+    public MyBotTelegram(String TOKEN) {
         telegramClient = new OkHttpTelegramClient(TOKEN);
     }
 
@@ -38,7 +38,9 @@ public class MyBot implements LongPollingSingleThreadUpdateConsumer {
             //sendMessageGetChatId(chatId, message);
         }
 
-        // при добавлении нового участника
+        /**
+         * При добавлении нового участника
+         */
         if (update.hasMessage() && !update.getMessage().getNewChatMembers().isEmpty()) {
 
             Chat chat = update.getMessage().getChat();
@@ -51,9 +53,12 @@ public class MyBot implements LongPollingSingleThreadUpdateConsumer {
         /**
          * Новый приватный чат с ботом
          */
-        if (update.hasMyChatMember()) {
-            Chat chat = update.getMyChatMember().getChat();
-            User user = update.getMyChatMember().getFrom();
+        if (update.hasMessage() && update.getMessage().hasEntities()
+                && update.getMessage().getChat().getType().equals("private")
+                && update.getMessage().getEntities().getFirst().getType().equals("bot_command")
+                && update.getMessage().getEntities().getFirst().getText().equals("/start")) {
+            Chat chat = update.getMessage().getChat();
+            User user = update.getMessage().getFrom();
             log.info("Новый пользователь в приватном чате метод update.hasMyChatMember() " + getUserData(user));
             sendMessageNewUser(chat, user);
         }

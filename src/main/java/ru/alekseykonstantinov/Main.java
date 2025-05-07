@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.alekseykonstantinov.config.Config;
-import ru.alekseykonstantinov.telegrambot.MyBot;
+import ru.alekseykonstantinov.telegrambot.MyBotTelegram;
 
 @Slf4j
 public class Main {
@@ -23,7 +23,7 @@ public class Main {
             // Instantiate Telegram Bots API
             TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication();
             // TODO Register our bot
-            botsApplication.registerBot(TOKEN, new MyBot(TOKEN));
+            botsApplication.registerBot(TOKEN, new MyBotTelegram(TOKEN));
         } catch (TelegramApiException e) {
             log.error("TelegramApiException: " + e.getMessage());
             e.printStackTrace();
