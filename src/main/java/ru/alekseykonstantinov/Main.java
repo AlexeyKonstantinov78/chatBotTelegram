@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.alekseykonstantinov.config.Config;
+import ru.alekseykonstantinov.telegrambot.MyBot;
 
 @Slf4j
 public class Main {

@@ -1,4 +1,4 @@
-package ru.alekseykonstantinov;
+package ru.alekseykonstantinov.telegrambot;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
