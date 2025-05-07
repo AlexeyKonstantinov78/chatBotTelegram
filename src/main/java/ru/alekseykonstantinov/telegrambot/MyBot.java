@@ -8,6 +8,7 @@ import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateC
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.api.objects.chat.Chat;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
@@ -40,18 +41,30 @@ public class MyBot implements LongPollingSingleThreadUpdateConsumer {
         // при добавлении нового участника
         if (update.hasMessage() && !update.getMessage().getNewChatMembers().isEmpty()) {
 
-            Long chatId = update.getMessage().getChatId();
+            Chat chat = update.getMessage().getChat();
             update.getMessage().getNewChatMembers().stream().forEach(user -> {
                 log.info("Новый пользователь метод update.getMessage().getNewChatMembers() " + getUserData(user));
-                sendMessageNewUser(chatId, user);
+                sendMessageNewUser(chat, user);
             });
+        }
+
+        /**
+         * Новый приватный чат с ботом
+         */
+        if (update.hasMyChatMember()) {
+            Chat chat = update.getMyChatMember().getChat();
+            User user = update.getMyChatMember().getFrom();
+            log.info("Новый пользователь в приватном чате метод update.hasMyChatMember() " + getUserData(user));
+            sendMessageNewUser(chat, user);
         }
 
         // при удалении из участника
         if (update.hasMessage() && update.getMessage().getLeftChatMember() != null) {
             StringBuilder sb = new StringBuilder();
             User leftChatMemberUser = update.getMessage().getLeftChatMember();
-            log.info("Пользователь удален из участников метод update.getMessage().getLeftChatMember() != null " + getUserData(leftChatMemberUser));
+            log.info("Пользователь удален из участников метод update.getMessage().getLeftChatMember() != null "
+                    + getUserData(leftChatMemberUser) + " "
+                    + update.getMessage().getChat().getTitle());
         }
     }
 
@@ -73,16 +86,23 @@ public class MyBot implements LongPollingSingleThreadUpdateConsumer {
     /**
      * Метод подготовки сообщение приветствие новому участнику
      *
-     * @param chatId чат ид
-     * @param user   новый участник или юзер
+     * @param chat чат
+     * @param user новый участник или юзер
      */
-    public void sendMessageNewUser(Long chatId, User user) {
+    public void sendMessageNewUser(Chat chat, User user) {
+        String msgGroup = chat.getType().equals("supergroup")
+                ? "в группу " + chat.getTitle()
+                : chat.getType().equals("private")
+                ? "в " + chat.getType() + " чат"
+                : "";
+
         String message = String.format(
-                "@%1s Привет %2s Добро пожаловать в группу ",
+                "@%1s Привет %2s. Добро пожаловать %3s",
                 user.getUserName(),
-                user.getFirstName()
+                user.getFirstName(),
+                msgGroup
         );
-        sendMessageGetChatId(chatId, message);
+        sendMessageGetChatId(chat.getId(), message);
     }
 
     /**
