@@ -37,40 +37,60 @@ public class MyBot implements LongPollingSingleThreadUpdateConsumer {
             //sendMessageGetChatId(chatId, message);
         }
 
+        // при добавлении нового участника
         if (update.hasMessage() && !update.getMessage().getNewChatMembers().isEmpty()) {
-            StringBuilder sb = new StringBuilder();
+
             Long chatId = update.getMessage().getChatId();
-            update.getMessage().getNewChatMembers().stream().forEach(User -> {
-                sb.append("id: " + User.getId() + " ");
-                sb.append("firstName: " + User.getFirstName() + " ");
-                sb.append("isBot: " + User.getIsBot() + " ");
-                sb.append("userName: " + User.getUserName() + " ");
-
-                String message = String.format(
-                        "@%1s Привет %2s Добро пожаловать в группу ",
-                        User.getUserName(),
-                        User.getFirstName()
-                );
-                sendMessageGetChatId(chatId, message);
+            update.getMessage().getNewChatMembers().stream().forEach(user -> {
+                log.info("Новый пользователь метод update.getMessage().getNewChatMembers() " + getUserData(user));
+                sendMessageNewUser(chatId, user);
             });
-            log.info("Новый пользователь метод update.getMessage().getNewChatMembers() " + sb.toString());
-
         }
 
         // при удалении из участника
         if (update.hasMessage() && update.getMessage().getLeftChatMember() != null) {
             StringBuilder sb = new StringBuilder();
-            User leftChatMember = update.getMessage().getLeftChatMember();
-
-            sb.append("id: " + leftChatMember.getId() + " ");
-            sb.append("firstName: " + leftChatMember.getFirstName() + " ");
-            sb.append("isBot: " + leftChatMember.getIsBot() + " ");
-            sb.append("userName: " + leftChatMember.getUserName() + " ");
-
-            log.info("Пользователь удален из участников метод update.getMessage().getLeftChatMember() != null " + sb.toString());
+            User leftChatMemberUser = update.getMessage().getLeftChatMember();
+            log.info("Пользователь удален из участников метод update.getMessage().getLeftChatMember() != null " + getUserData(leftChatMemberUser));
         }
     }
 
+    /**
+     * @param user юзер
+     *             Метод для получения данных юзера
+     */
+    public String getUserData(User user) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("id: " + user.getId() + " ");
+        sb.append("firstName: " + user.getFirstName() + " ");
+        sb.append("isBot: " + user.getIsBot() + " ");
+        sb.append("userName: " + user.getUserName() + " ");
+
+        return sb.toString();
+    }
+
+    /**
+     * Метод подготовки сообщение приветствие новому участнику
+     *
+     * @param chatId чат ид
+     * @param user   новый участник или юзер
+     */
+    public void sendMessageNewUser(Long chatId, User user) {
+        String message = String.format(
+                "@%1s Привет %2s Добро пожаловать в группу ",
+                user.getUserName(),
+                user.getFirstName()
+        );
+        sendMessageGetChatId(chatId, message);
+    }
+
+    /**
+     * Отправка сообщения в чат
+     *
+     * @param chatId чат ид
+     * @param msg    сообщение
+     */
     public void sendMessageGetChatId(Long chatId, String msg) {
         SendMessage sendMessage = new SendMessage(chatId.toString(), msg);
         try {
@@ -82,10 +102,17 @@ public class MyBot implements LongPollingSingleThreadUpdateConsumer {
         }
     }
 
+
     public void printUpdate(List<Update> updates) {
         System.out.println(updates.get(0));
     }
 
+    /**
+     * Разбор ответа на json формат
+     *
+     * @param updates список события
+     * @return возврат в json формате
+     */
     public String toPrettyJson(List<Update> updates) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         return gson.toJson(updates);
