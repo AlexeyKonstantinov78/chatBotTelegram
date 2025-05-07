@@ -11,15 +11,19 @@ import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.chat.Chat;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
+import ru.alekseykonstantinov.telegrambot.group.WebFrontGroup;
 
 import java.util.List;
 
+import static ru.alekseykonstantinov.config.Config.TELEGRAM_BOT_GROUP_FRONT_NAME;
+
 @Slf4j
 public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
-    TelegramClient telegramClient;
+    protected TelegramClient telegramClient;
 
     public MyBotTelegram(String TOKEN) {
         telegramClient = new OkHttpTelegramClient(TOKEN);
+
     }
 
     @Override
@@ -36,6 +40,13 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
             log.info("Получено сообщение: " + message);
             //Long chatId = update.getMessage().getChatId();
             //sendMessageGetChatId(chatId, message);
+        }
+
+        // обработка сообщений полученных от группы
+        if (update.hasMessage()
+                && update.getMessage().getChat().getType().equals("supergroup")
+                && update.getMessage().getChat().getTitle().equals(TELEGRAM_BOT_GROUP_FRONT_NAME)) {
+            new WebFrontGroup().consumeGroup(update);
         }
 
         /**
@@ -138,7 +149,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      * @param updates список события
      * @return возврат в json формате
      */
-    public String toPrettyJson(List<Update> updates) {
+    public <T> String toPrettyJson(List<T> updates) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         return gson.toJson(updates);
     }
