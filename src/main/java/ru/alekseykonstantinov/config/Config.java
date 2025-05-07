@@ -9,18 +9,20 @@ import java.util.Properties;
 //@Slf4j
 @Getter
 public class Config {
-    private final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Config.class);
-    private String TELEGRAM_BOT_NAME; //TODO: добавь имя бота в кавычках
-    private String TELEGRAM_BOT_TOKEN; //TODO: добавь токен бота в кавычках
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Config.class);
+    public static String TELEGRAM_BOT_NAME; //TODO: добавь имя бота в кавычках
+    public static String TELEGRAM_BOT_TOKEN; //TODO: добавь токен бота в кавычках
+    public static String TELEGRAM_BOT_GROUP_FRONT_NAME;
 
-    public Config() {
+    static {
         Properties props = new Properties();
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream("config.properties")) {
+        try (InputStream input = Config.class.getClassLoader().getResourceAsStream("config.properties")) {
             props.load(input); // Загружаем файл
 
             // Получаем значения
             TELEGRAM_BOT_NAME = props.getProperty("telegram.bot.name");
             TELEGRAM_BOT_TOKEN = props.getProperty("telegram.bot.token");
+            TELEGRAM_BOT_GROUP_FRONT_NAME = props.getProperty("telegram.bot.group.name.front");
 
         } catch (IOException e) {
 
