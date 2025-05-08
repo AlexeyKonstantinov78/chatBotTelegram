@@ -20,6 +20,11 @@
                         </manifest>
                     </archive>
                 </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -85,11 +90,11 @@
             <version>2.13.1</version>
         </dependency>
 
-        <!--        <dependency>-->
-        <!--            <groupId>org.telegram</groupId>-->
-        <!--            <artifactId>telegrambots</artifactId>-->
-        <!--            <version>6.9.7.1</version>-->
-        <!--        </dependency>-->
+        <dependency>
+            <groupId>org.telegram</groupId>
+            <artifactId>telegrambots</artifactId>
+            <version>6.9.7.1</version>
+        </dependency>
 
     </dependencies>
 
