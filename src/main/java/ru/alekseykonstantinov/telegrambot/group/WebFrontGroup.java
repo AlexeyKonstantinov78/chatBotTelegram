@@ -29,13 +29,13 @@ public class WebFrontGroup extends MyBotTelegram {
         if (update.hasMessage()) {
             if (update.getMessage().getFrom() != null) {
                 ChatMember chatMember = getChatMember(update);
-                log.info("Информация о member: " + toPrettyJson(chatMember));
-                log.info("Роль в группе: " + getMemberRole(chatMember));
+                log.info("Информация о member: {}", toPrettyJson(chatMember));
+                log.info("Роль в группе: {}", getMemberRole(chatMember));
             }
             if (update.getMessage().getChat() != null) {
                 Long chatId = update.getMessage().getChatId();
                 ChatFullInfo chatFullInfo = getChat(chatId);
-                log.info("Информаация о чате: \n" + toPrettyJson(chatFullInfo));
+                log.info("Информация о чате: \n{}", toPrettyJson(chatFullInfo));
             }
         }
 
@@ -44,15 +44,15 @@ public class WebFrontGroup extends MyBotTelegram {
             log.info("Вызов списка лист");
 
             List<ChatMember> administrators = getChatAdministrators(update);
-            log.info("Список админов: \n" + toPrettyJson(administrators));
-            log.info("Count: " + getChatMemberCount(update));
+            log.info("Список админов: \n{}", toPrettyJson(administrators));
+            log.info("Count: {}", getChatMemberCount(update));
 
             return;
         }
 
         if (update.hasMessage() && update.getMessage().hasText()) {
             String message = update.getMessage().getText();
-            log.info("Получено сообщение в группе: " + TELEGRAM_BOT_GROUP_FRONT_NAME + " message:  " + message);
+            log.info("Получено сообщение в группе: {}{}{}", TELEGRAM_BOT_GROUP_FRONT_NAME, " message:  ", message);
             Long chatId = update.getMessage().getChatId();
             sendMessageGetChatId(chatId, message);
         }
@@ -71,7 +71,7 @@ public class WebFrontGroup extends MyBotTelegram {
         try {
             infoChat = telegramClient.execute(getChat);
         } catch (TelegramApiException e) {
-            log.info("Не получили информацию о чате: " + e.getMessage());
+            log.error("Не получили информацию о чате: {}", e.getMessage());
             return null;
         }
         return infoChat;
@@ -91,7 +91,7 @@ public class WebFrontGroup extends MyBotTelegram {
             administrators = telegramClient.execute(getChatAdministrators);
 
         } catch (TelegramApiException e) {
-            log.info("Ошибка получения данных" + e.getMessage());
+            log.error("Ошибка получения списка админов данных: {}", e.getMessage());
             return null;
         }
         return administrators;
@@ -111,7 +111,7 @@ public class WebFrontGroup extends MyBotTelegram {
         try {
             chatMemberUser = telegramClient.execute(getChatMember);
         } catch (TelegramApiException e) {
-            log.error("Ошибка получения данных: " + e.getMessage());
+            log.error("Ошибка получения данных члена: {}", e.getMessage());
             return null;
         }
 
@@ -133,7 +133,7 @@ public class WebFrontGroup extends MyBotTelegram {
             chatMemberCount = telegramClient.execute(getChatMemberCount);
 
         } catch (TelegramApiException e) {
-            log.info("Ошибка получения данных" + e.getMessage());
+            log.error("Ошибка получения количества членов группы: {}", e.getMessage());
             return null;
         }
         return chatMemberCount;
@@ -142,8 +142,8 @@ public class WebFrontGroup extends MyBotTelegram {
     /**
      * Роли группы участников
      *
-     * @param member
-     * @return
+     * @param member данные участника
+     * @return тип участника
      */
     private String getMemberRole(ChatMember member) {
         if (member instanceof ChatMemberOwner) {
