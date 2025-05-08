@@ -1,10 +1,12 @@
 package ru.alekseykonstantinov.telegrambot.group;
 
 import lombok.extern.slf4j.Slf4j;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChat;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatAdministrators;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMemberCount;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.chat.ChatFullInfo;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberAdministrator;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberOwner;
@@ -24,10 +26,17 @@ public class WebFrontGroup extends MyBotTelegram {
     }
 
     public void consumeGroup(Update update) {
-        if (update.hasMessage() && update.getMessage().getFrom() != null) {
-            ChatMember chatMember = getChatMember(update);
-            log.info("Информация о member: " + toPrettyJson(chatMember));
-            log.info("Роль в группе: " + getMemberRole(chatMember));
+        if (update.hasMessage()) {
+            if (update.getMessage().getFrom() != null) {
+                ChatMember chatMember = getChatMember(update);
+                log.info("Информация о member: " + toPrettyJson(chatMember));
+                log.info("Роль в группе: " + getMemberRole(chatMember));
+            }
+            if (update.getMessage().getChat() != null) {
+                Long chatId = update.getMessage().getChatId();
+                ChatFullInfo chatFullInfo = getChat(chatId);
+                log.info("Информаация о чате: \n" + toPrettyJson(chatFullInfo));
+            }
         }
 
         if (update.getMessage().hasEntities() && update.getMessage().getEntities().getFirst().getType().equals("bot_command")
@@ -48,6 +57,24 @@ public class WebFrontGroup extends MyBotTelegram {
             sendMessageGetChatId(chatId, message);
         }
 
+    }
+
+    /**
+     * Получение данных о чате
+     *
+     * @param chatId ид чата
+     * @return class ChatFullInfo
+     */
+    public ChatFullInfo getChat(Long chatId) {
+        GetChat getChat = new GetChat(chatId.toString());
+        ChatFullInfo infoChat;
+        try {
+            infoChat = telegramClient.execute(getChat);
+        } catch (TelegramApiException e) {
+            log.info("Не получили информацию о чате: " + e.getMessage());
+            return null;
+        }
+        return infoChat;
     }
 
     /**
