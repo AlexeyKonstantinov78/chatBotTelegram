@@ -20,11 +20,10 @@ public class Main {
             // TODO Register our bot
             botsApplication.registerBot(TELEGRAM_BOT_TOKEN, new MyBotTelegram(TELEGRAM_BOT_TOKEN));
         } catch (TelegramApiException e) {
-            log.error("TelegramApiException: " + e.getMessage());
-            e.printStackTrace();
+            log.error("TelegramApiException: {}", e.getMessage());
+
         } catch (Exception e) {
-            log.error("Exception: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Exception: {}", e.getMessage());
         }
     }
 }

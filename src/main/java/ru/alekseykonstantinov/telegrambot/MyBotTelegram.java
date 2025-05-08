@@ -37,7 +37,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         log.info(update.toString());
         if (update.hasMessage() && update.getMessage().hasText()) {
             String message = update.getMessage().getText();
-            log.info("Получено сообщение: " + message);
+            log.info("Получено сообщение: {}", message);
             //Long chatId = update.getMessage().getChatId();
             //sendMessageGetChatId(chatId, message);
         }
@@ -49,38 +49,34 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
             new WebFrontGroup().consumeGroup(update);
         }
 
-        /**
-         * При добавлении нового участника
-         */
+        //При добавлении нового участника
         if (update.hasMessage() && !update.getMessage().getNewChatMembers().isEmpty()) {
 
             Chat chat = update.getMessage().getChat();
-            update.getMessage().getNewChatMembers().stream().forEach(user -> {
-                log.info("Новый пользователь метод update.getMessage().getNewChatMembers() " + getUserData(user));
-                sendMessageNewUser(chat, user);
-            });
+            update.getMessage().getNewChatMembers().stream()
+                    .forEach(user -> {
+                        log.info("Новый пользователь метод update.getMessage().getNewChatMembers() {}", getUserData(user));
+                        sendMessageNewUser(chat, user);
+                    });
         }
 
-        /**
-         * Новый приватный чат с ботом
-         */
+        // Новый приватный чат с ботом
         if (update.hasMessage() && update.getMessage().hasEntities()
                 && update.getMessage().getChat().getType().equals("private")
                 && update.getMessage().getEntities().getFirst().getType().equals("bot_command")
                 && update.getMessage().getEntities().getFirst().getText().equals("/start")) {
             Chat chat = update.getMessage().getChat();
             User user = update.getMessage().getFrom();
-            log.info("Новый пользователь в приватном чате метод update.hasMyChatMember() " + getUserData(user));
+            log.info("Новый пользователь в приватном чате метод update.hasMyChatMember() {}", getUserData(user));
             sendMessageNewUser(chat, user);
         }
 
         // при удалении из участника
         if (update.hasMessage() && update.getMessage().getLeftChatMember() != null) {
-            StringBuilder sb = new StringBuilder();
             User leftChatMemberUser = update.getMessage().getLeftChatMember();
-            log.info("Пользователь удален из участников метод update.getMessage().getLeftChatMember() != null "
-                    + getUserData(leftChatMemberUser) + " "
-                    + update.getMessage().getChat().getTitle());
+            log.info("Пользователь удален из участников метод update.getMessage().getLeftChatMember() != null {} {}",
+                    getUserData(leftChatMemberUser),
+                    update.getMessage().getChat().getTitle());
         }
     }
 
@@ -90,8 +86,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      */
     public String getUserData(User user) {
         StringBuilder sb = new StringBuilder();
-
-        sb.append("id: " + user.getId() + " ");
+        sb.append("id: {}" + user.getId() + " ");
         sb.append("firstName: " + user.getFirstName() + " ");
         sb.append("isBot: " + user.getIsBot() + " ");
         sb.append("userName: " + user.getUserName() + " ");
@@ -132,15 +127,10 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         try {
             // Execute it
             telegramClient.execute(sendMessage);
-            log.info("chatId: " + chatId + "; Отправлено сообщение: " + msg);
+            log.info("chatId: {}{} {}", chatId, "; Отправлено сообщение: {}", msg);
         } catch (TelegramApiException e) {
-            log.error("Ошибка отправки сообщения: " + e.getMessage());
+            log.error("Ошибка отправки сообщения: {}", e.getMessage());
         }
-    }
-
-
-    public void printUpdate(List<Update> updates) {
-        System.out.println(updates.get(0));
     }
 
     /**
