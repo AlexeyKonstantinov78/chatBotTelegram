@@ -146,12 +146,12 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
     /**
      * Разбор ответа на json формат
      *
-     * @param updates список события
+     * @param update список события
      * @return возврат в json формате
      */
-    public <T> String toPrettyJson(List<T> updates) {
+    public <T> String toPrettyJson(T update) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        return gson.toJson(updates);
+        return gson.toJson(update);
     }
 }
 
