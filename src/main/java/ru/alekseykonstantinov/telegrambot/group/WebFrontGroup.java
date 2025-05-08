@@ -2,6 +2,7 @@ package ru.alekseykonstantinov.telegrambot.group;
 
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatAdministrators;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMemberCount;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
@@ -23,6 +24,12 @@ public class WebFrontGroup extends MyBotTelegram {
     }
 
     public void consumeGroup(Update update) {
+        if (update.hasMessage() && update.getMessage().getFrom() != null) {
+            ChatMember chatMember = getChatMember(update);
+            log.info("Информация о member: " + toPrettyJson(chatMember));
+            log.info("Роль в группе: " + getMemberRole(chatMember));
+        }
+
         if (update.getMessage().hasEntities() && update.getMessage().getEntities().getFirst().getType().equals("bot_command")
                 && update.getMessage().getEntities().getFirst().getText().equals("/list")) {
             log.info("Вызов списка лист");
@@ -30,6 +37,7 @@ public class WebFrontGroup extends MyBotTelegram {
             List<ChatMember> administrators = getChatAdministrators(update);
             log.info("Список админов: \n" + toPrettyJson(administrators));
             log.info("Count: " + getChatMemberCount(update));
+
             return;
         }
 
@@ -49,7 +57,6 @@ public class WebFrontGroup extends MyBotTelegram {
      */
     public List<ChatMember> getChatAdministrators(Update update) {
         Long chatId = update.getMessage().getChat().getId();
-        log.info("chatId group: " + chatId);
         List<ChatMember> administrators;
 
         try {
@@ -63,6 +70,33 @@ public class WebFrontGroup extends MyBotTelegram {
         return administrators;
     }
 
+    /**
+     * Получает данные member из группы которые разрешены
+     *
+     * @param update событие
+     * @return class ChatMember
+     */
+    public ChatMember getChatMember(Update update) {
+        ChatMember chatMemberUser;
+        Long chatId = update.getMessage().getChatId();
+        Long userId = update.getMessage().getFrom().getId();
+        GetChatMember getChatMember = new GetChatMember(chatId.toString(), userId);
+        try {
+            chatMemberUser = telegramClient.execute(getChatMember);
+        } catch (TelegramApiException e) {
+            log.error("Ошибка получения данных: " + e.getMessage());
+            return null;
+        }
+
+        return chatMemberUser;
+    }
+
+    /**
+     * Получаем количество участников группы
+     *
+     * @param update событие данные
+     * @return количество members
+     */
     public Integer getChatMemberCount(Update update) {
         Long chatId = update.getMessage().getChat().getId();
         Integer chatMemberCount;
@@ -78,6 +112,12 @@ public class WebFrontGroup extends MyBotTelegram {
         return chatMemberCount;
     }
 
+    /**
+     * Роли группы участников
+     *
+     * @param member
+     * @return
+     */
     private String getMemberRole(ChatMember member) {
         if (member instanceof ChatMemberOwner) {
             return "Владелец";
