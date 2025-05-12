@@ -10,8 +10,6 @@ import static ru.alekseykonstantinov.config.Config.TELEGRAM_BOT_TOKEN;
 
 @Slf4j
 public class Main {
-
-
     public static void main(String[] args) {
 
         try {

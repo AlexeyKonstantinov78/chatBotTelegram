@@ -13,8 +13,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import ru.alekseykonstantinov.telegrambot.group.WebFrontGroup;
 
-import java.util.List;
-
 import static ru.alekseykonstantinov.config.Config.TELEGRAM_BOT_GROUP_FRONT_NAME;
 
 @Slf4j
@@ -26,15 +24,14 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
 
     }
 
-    @Override
-    public void consume(List<Update> updates) {
-        LongPollingSingleThreadUpdateConsumer.super.consume(updates);
-        log.info(toPrettyJson(updates));
-    }
+//    @Override
+//    public void consume(List<Update> updates) {
+//        LongPollingSingleThreadUpdateConsumer.super.consume(updates);
+//        //log.info(toPrettyJson(updates));
+//    }
 
     @Override
     public void consume(Update update) {
-        log.info(update.toString());
         if (update.hasMessage() && update.getMessage().hasText()) {
             String message = update.getMessage().getText();
             log.info("Получено сообщение: {}", message);
@@ -71,7 +68,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
             sendMessageNewUser(chat, user);
         }
 
-        // при удалении из участника
+        // при удалении участника
         if (update.hasMessage() && update.getMessage().getLeftChatMember() != null) {
             User leftChatMemberUser = update.getMessage().getLeftChatMember();
             log.info("Пользователь удален из участников метод update.getMessage().getLeftChatMember() != null {} {}",
@@ -82,7 +79,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
 
     /**
      * @param user юзер
-     *             Метод для получения данных юзера
+     *             Метод для получения данных юзера типа toString()
      */
     public String getUserData(User user) {
         StringBuilder sb = new StringBuilder();
