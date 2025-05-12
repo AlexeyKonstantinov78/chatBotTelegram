@@ -1,7 +1,5 @@
 package ru.alekseykonstantinov.telegrambot;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
@@ -14,6 +12,7 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 import ru.alekseykonstantinov.telegrambot.group.WebFrontGroup;
 
 import static ru.alekseykonstantinov.config.Config.TELEGRAM_BOT_GROUP_FRONT_NAME;
+import static ru.alekseykonstantinov.utilites.Utilities.getUserData;
 
 @Slf4j
 public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
@@ -21,7 +20,6 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
 
     public MyBotTelegram(String TOKEN) {
         telegramClient = new OkHttpTelegramClient(TOKEN);
-
     }
 
 //    @Override
@@ -77,19 +75,6 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         }
     }
 
-    /**
-     * @param user юзер
-     *             Метод для получения данных юзера типа toString()
-     */
-    public String getUserData(User user) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("id: {}" + user.getId() + " ");
-        sb.append("firstName: " + user.getFirstName() + " ");
-        sb.append("isBot: " + user.getIsBot() + " ");
-        sb.append("userName: " + user.getUserName() + " ");
-
-        return sb.toString();
-    }
 
     /**
      * Метод подготовки сообщение приветствие новому участнику
@@ -130,15 +115,5 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         }
     }
 
-    /**
-     * Разбор ответа на json формат
-     *
-     * @param update список события
-     * @return возврат в json формате
-     */
-    public <T> String toPrettyJson(T update) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        return gson.toJson(update);
-    }
 }
 

@@ -17,6 +17,7 @@ import java.util.List;
 
 import static ru.alekseykonstantinov.config.Config.TELEGRAM_BOT_GROUP_FRONT_NAME;
 import static ru.alekseykonstantinov.config.Config.TELEGRAM_BOT_TOKEN;
+import static ru.alekseykonstantinov.utilites.Utilities.toPrettyJson;
 
 @Slf4j
 public class WebFrontGroup extends MyBotTelegram {
