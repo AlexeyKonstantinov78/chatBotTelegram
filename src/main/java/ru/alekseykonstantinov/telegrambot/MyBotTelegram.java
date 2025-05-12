@@ -3,13 +3,20 @@ package ru.alekseykonstantinov.telegrambot;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.File;
+import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.chat.Chat;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import ru.alekseykonstantinov.telegrambot.group.WebFrontGroup;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 
 import static ru.alekseykonstantinov.config.Config.TELEGRAM_BOT_GROUP_FRONT_NAME;
 import static ru.alekseykonstantinov.utilites.Utilities.getUserData;
@@ -115,5 +122,72 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         }
     }
 
+    /**
+     * Извлечет PhotoSize из фотографии,
+     * отправленной боту (в нашем случае мы берем больший размер из предоставленных):
+     *
+     * @param update событие
+     * @return PhotoSize object
+     */
+    public PhotoSize getPhoto(Update update) {
+        // Check that the update contains a message and the message has a photo
+        if (update.hasMessage() && update.getMessage().hasPhoto()) {
+            // When receiving a photo, you usually get different sizes of it
+            List<PhotoSize> photos = update.getMessage().getPhoto();
+
+            // We fetch the bigger photo
+            return photos.stream()
+                    .max(Comparator.comparing(PhotoSize::getFileSize)).orElse(null);
+        }
+
+        // Return null if not found
+        return null;
+    }
+
+    /**
+     * Метод обработает оба (у нас есть два варианта: file_path уже есть или нам нужно его получить)
+     * варианта и вернет финальный file_path:
+     *
+     * @param photo PhotoSize
+     * @return string path
+     */
+    public String getFilePath(PhotoSize photo) {
+        Objects.requireNonNull(photo);
+
+        if (photo.getFilePath() != null) { // If the file_path is already present, we are done!
+            return photo.getFilePath();
+        } else { // If not, let find it
+            // We create a GetFile method and set the file_id from the photo
+            GetFile getFileMethod = new GetFile(photo.getFileId());
+            //getFileMethod.setFileId(photo.getFileId());
+            try {
+                // We execute the method using AbsSender::execute method.
+                File file = telegramClient.execute(getFileMethod);
+                // We now have the file_path
+                return file.getFilePath();
+            } catch (TelegramApiException e) {
+                log.error("Ошибка получения пути к файлу: {}", e.getMessage());
+            }
+        }
+
+        return null; // Just in case
+    }
+
+    /**
+     * Теперь, когда у нас есть, file_path мы можем его скачать
+     *
+     * @param filePath String
+     * @return java.io.File object
+     */
+    public java.io.File downloadPhotoByFilePath(String filePath) {
+        try {
+            // Download the file calling AbsSender::downloadFile method
+            return telegramClient.downloadFile(filePath);
+        } catch (TelegramApiException e) {
+            log.error("Ошибка получения объекта для скачивания к файлу: {}", e.getMessage());
+        }
+
+        return null;
+    }
 }
 
