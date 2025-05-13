@@ -3,7 +3,9 @@ package ru.alekseykonstantinov.telegrambot;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
+import org.telegram.telegrambots.meta.api.methods.ActionType;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
@@ -123,6 +125,39 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
     }
 
     /**
+     * Отобразить ChatActions, такие как «набор текста» или «запись голосового сообщения»
+     *
+     * @param update событие
+     */
+    public void chatActions(Update update) {
+        String text = update.getMessage().getText();
+        String chatId = update.getMessage().getChatId().toString();
+        //sendChatAction.setChatId(update.getMessage().getChatId());
+        ActionType actionType;
+
+        if (text.equals("/type")) {
+            // -> "typing"
+            actionType = ActionType.TYPING;
+            // -> "recording a voice message"
+        } else if (text.equals("/record_audio")) {
+            actionType = ActionType.RECORD_VOICE;
+        } else {
+            // -> more actions in the Enum ActionType
+            // For information: https://core.telegram.org/bots/api#sendchataction
+            actionType = ActionType.UPLOAD_DOCUMENT;
+        }
+        SendChatAction sendChatAction = new SendChatAction(chatId, actionType.name());
+
+        try {
+            Boolean wasSuccessfull = telegramClient.execute(sendChatAction);
+            log.info("chatActions: {}", wasSuccessfull);
+        } catch (TelegramApiException e) {
+            // TODO Auto-generated catch block
+            log.error("Что то пошло не так chatActions: {}", e.getMessage());
+        }
+    }
+
+    /**
      * Извлечет PhotoSize из фотографии,
      * отправленной боту (в нашем случае мы берем больший размер из предоставленных):
      *
@@ -189,5 +224,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
 
         return null;
     }
+
+
 }
 
