@@ -5,6 +5,7 @@ import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.methods.ActionType;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.methods.botapimethods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.File;
@@ -84,7 +85,6 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         }
     }
 
-
     /**
      * Метод подготовки сообщение приветствие новому участнику
      *
@@ -115,13 +115,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      */
     public void sendMessageGetChatId(Long chatId, String msg) {
         SendMessage sendMessage = new SendMessage(chatId.toString(), msg);
-        try {
-            // Execute it
-            telegramClient.execute(sendMessage);
-            log.info("chatId: {}{} {}", chatId, "; Отправлено сообщение: {}", msg);
-        } catch (TelegramApiException e) {
-            log.error("Ошибка отправки сообщения: {}", e.getMessage());
-        }
+        send(sendMessage);
     }
 
     /**
@@ -147,13 +141,22 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
             actionType = ActionType.UPLOAD_DOCUMENT;
         }
         SendChatAction sendChatAction = new SendChatAction(chatId, actionType.name());
+        send(sendChatAction);
+    }
 
+    /**
+     * Отправка боту в зависимости от метода и чата
+     *
+     * @param method ограничены методами BotApiMethod
+     * @param <T>
+     */
+    public <T extends BotApiMethod> void send(T method) {
         try {
-            Boolean wasSuccessfull = telegramClient.execute(sendChatAction);
-            log.info("chatActions: {}", wasSuccessfull);
+            telegramClient.execute(method);
+            log.info("send: {}", "success");
         } catch (TelegramApiException e) {
             // TODO Auto-generated catch block
-            log.error("Что то пошло не так chatActions: {}", e.getMessage());
+            log.error("Что то пошло не так send: {}", e.getMessage());
         }
     }
 

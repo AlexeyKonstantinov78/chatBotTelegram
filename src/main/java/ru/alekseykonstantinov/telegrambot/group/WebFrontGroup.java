@@ -15,6 +15,7 @@ import ru.alekseykonstantinov.telegrambot.MyBotTelegram;
 
 import java.util.List;
 
+import static ru.alekseykonstantinov.config.Config.TELEGRAM_BOT_GROUP_FRONT_NAME;
 import static ru.alekseykonstantinov.config.Config.TELEGRAM_BOT_TOKEN;
 import static ru.alekseykonstantinov.utilites.Utilities.toPrettyJson;
 
@@ -54,12 +55,12 @@ public class WebFrontGroup extends MyBotTelegram {
             return;
         }
 
-//        if (update.hasMessage() && update.getMessage().hasText()) {
-//            String message = update.getMessage().getText();
-//            log.info("Получено сообщение в группе: {}{}{}", TELEGRAM_BOT_GROUP_FRONT_NAME, " message:  ", message);
-//            Long chatId = update.getMessage().getChatId();
-//            sendMessageGetChatId(chatId, message);
-//        }
+        if (update.hasMessage() && update.getMessage().hasText()) {
+            String message = update.getMessage().getText();
+            log.info("Получено сообщение в группе: {}{}{}", TELEGRAM_BOT_GROUP_FRONT_NAME, " message:  ", message);
+            Long chatId = update.getMessage().getChatId();
+            sendMessageGetChatId(chatId, message);
+        }
 
     }
 
