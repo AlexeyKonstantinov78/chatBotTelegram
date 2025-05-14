@@ -62,11 +62,9 @@ public class WebFrontGroup extends MyBotTelegram {
             Long chatId = update.getMessage().getChatId();
             sendMessageGetChatId(chatId, message);
 
-            try {
-                sendImageUploadingAFileJpg("ulybashka", chatId.toString());
-            } catch (NullPointerException e) {
-                log.error("Что-то не так: {}", e.getMessage());
-            }
+            //отправка изображения по названию
+            sendImageUploadingAFileJpg("ulybashka", chatId.toString());
+
         }
 
     }
