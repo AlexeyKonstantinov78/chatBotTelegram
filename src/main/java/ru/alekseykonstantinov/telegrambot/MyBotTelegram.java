@@ -14,6 +14,7 @@ import org.telegram.telegrambots.meta.api.objects.chat.Chat;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import ru.alekseykonstantinov.telegrambot.group.WebFrontGroup;
+import ru.alekseykonstantinov.telegrambot.privatechat.PrivateChat;
 
 import java.util.Comparator;
 import java.util.List;
@@ -25,19 +26,26 @@ import static ru.alekseykonstantinov.utilites.Utilities.getUserData;
 @Slf4j
 public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
     protected TelegramClient telegramClient;
+    private final String TOKEN;
 
     public MyBotTelegram(String TOKEN) {
         telegramClient = new OkHttpTelegramClient(TOKEN);
+        this.TOKEN = TOKEN;
     }
 
 //    @Override
 //    public void consume(List<Update> updates) {
 //        LongPollingSingleThreadUpdateConsumer.super.consume(updates);
-//        //log.info(toPrettyJson(updates));
+//        log.info(toPrettyJson(updates));
 //    }
 
     @Override
     public void consume(Update update) {
+        //ChatActions, такие как «набор текста» или «запись голосового сообщения»
+        if (update.hasMessage() && update.getMessage().hasText()) {
+            chatActions(update);
+        }
+
         if (update.hasMessage() && update.getMessage().hasText()) {
             String message = update.getMessage().getText();
             log.info("Получено сообщение: {}", message);
@@ -49,7 +57,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         if (update.hasMessage()
                 && update.getMessage().getChat().getType().equals("supergroup")
                 && update.getMessage().getChat().getTitle().equals(TELEGRAM_BOT_GROUP_FRONT_NAME)) {
-            new WebFrontGroup().consumeGroup(update);
+            new WebFrontGroup(TOKEN).consumeGroup(update);
         }
 
         //При добавлении нового участника
@@ -61,6 +69,11 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
                         log.info("Новый пользователь метод update.getMessage().getNewChatMembers() {}", getUserData(user));
                         sendMessageNewUser(chat, user);
                     });
+        }
+
+        // обработка сообщений полученных от приватного чата
+        if (update.hasMessage() && update.getMessage().getChat().getType().equalsIgnoreCase("private")) {
+            new PrivateChat(TOKEN).consumePrivate(update);
         }
 
         // Новый приватный чат с ботом
