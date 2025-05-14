@@ -61,7 +61,12 @@ public class WebFrontGroup extends MyBotTelegram {
             log.info("Получено сообщение в группе: {}{}{}", TELEGRAM_BOT_GROUP_FRONT_NAME, " message:  ", message);
             Long chatId = update.getMessage().getChatId();
             sendMessageGetChatId(chatId, message);
-            sendImageFromUrl("https://avatars.mds.yandex.net/get-shedevrum/11478110/img_04263ce4f72011ee908b922ae52888c4/orig", chatId.toString());
+
+            try {
+                sendImageUploadingAFileJpg("ulybashka", chatId.toString());
+            } catch (NullPointerException e) {
+                log.error("Что-то не так: {}", e.getMessage());
+            }
         }
 
     }

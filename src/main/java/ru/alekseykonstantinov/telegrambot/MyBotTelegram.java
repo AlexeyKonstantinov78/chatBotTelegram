@@ -236,36 +236,69 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         return null;
     }
 
-    // отправка фото
-    // url
+    /**
+     * Отправка фото по url
+     *
+     * @param url    ссылка на фото
+     * @param chatId идентификатор чата
+     */
     public void sendImageFromUrl(String url, String chatId) {
         // Create send method
         SendPhoto sendPhotoRequest = new SendPhoto(chatId, new InputFile(url));
-        // Set destination chat id
-        //sendPhotoRequest.setChatId(chatId);
-        // Set the photo url as a simple photo
-        //sendPhotoRequest.setPhoto(new InputFile(url));
         send(sendPhotoRequest);
     }
 
+    /**
+     * Отправка фото по url
+     *
+     * @param fileId идентификатор фото на серверах telegram
+     * @param chatId идентификатор чата
+     */
     public void sendImageFromFileId(String fileId, String chatId) {
-        // Create send method
         SendPhoto sendPhotoRequest = new SendPhoto(chatId, new InputFile(fileId));
-        // Set destination chat id
-        //sendPhotoRequest.setChatId(chatId);
-        // Set the photo url as a simple photo
-        //sendPhotoRequest.setPhoto(new InputFile(fileId));
         send(sendPhotoRequest);
     }
 
+    /**
+     * Метод для отправки изображение в чат
+     *
+     * @param name   имя файла
+     * @param chatId идентификатор чата
+     */
+    public void sendImageUploadingAFileJpg(String name, String chatId) {
+        sendImageUploadingAFile(getPathResourcesImageNameJpg(name), chatId);
+    }
+
+    /**
+     * Отправка фото из ресурса
+     *
+     * @param filePath путь к фото /image...
+     * @param chatId   идентификатор чата
+     */
     public void sendImageUploadingAFile(String filePath, String chatId) {
+        java.io.File file = new java.io.File(filePath);
+        // Проверка существования файла
+        if (!file.exists()) {
+            log.error("Файл не найден: {}", filePath);
+        }
         // Create send method
-        SendPhoto sendPhotoRequest = new SendPhoto(chatId, new InputFile(filePath));
-        // Set destination chat id
-        //sendPhotoRequest.setChatId(chatId);
-        // Set the photo file as a new photo (You can also use InputStream with a constructor overload)
-        //sendPhotoRequest.setPhoto(new InputFile(new File(filePath)));
+        SendPhoto sendPhotoRequest = new SendPhoto(chatId, new InputFile(file));
         send(sendPhotoRequest);
+    }
+
+    /**
+     * Путь к файлу в ресурсе по названию
+     *
+     * @param name имя файла без расширения по умолчанию jpg
+     * @return возвращает путь к файлу
+     */
+    public String getPathResourcesImageNameJpg(String name) {
+        try {
+            return MyBotTelegram.class.getClassLoader().getResource("image/" + name + ".jpg").getPath();
+        } catch (NullPointerException e) {
+            log.error("Стаким именем файла скорее всего нет: {}", name);
+            return "";
+        }
     }
 }
 
