@@ -8,10 +8,8 @@ import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.botapimethods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.File;
-import org.telegram.telegrambots.meta.api.objects.PhotoSize;
-import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.chat.Chat;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
@@ -148,9 +146,19 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      * Отправка боту в зависимости от метода и чата
      *
      * @param method ограничены методами BotApiMethod
-     * @param <T>
+     * @param
      */
     public <T extends BotApiMethod> void send(T method) {
+        try {
+            telegramClient.execute(method);
+            log.info("send: {}", "success");
+        } catch (TelegramApiException e) {
+            // TODO Auto-generated catch block
+            log.error("Что то пошло не так send: {}", e.getMessage());
+        }
+    }
+
+    public <T extends SendPhoto> void send(T method) {
         try {
             telegramClient.execute(method);
             log.info("send: {}", "success");
@@ -228,6 +236,36 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         return null;
     }
 
+    // отправка фото
+    // url
+    public void sendImageFromUrl(String url, String chatId) {
+        // Create send method
+        SendPhoto sendPhotoRequest = new SendPhoto(chatId, new InputFile(url));
+        // Set destination chat id
+        //sendPhotoRequest.setChatId(chatId);
+        // Set the photo url as a simple photo
+        //sendPhotoRequest.setPhoto(new InputFile(url));
+        send(sendPhotoRequest);
+    }
 
+    public void sendImageFromFileId(String fileId, String chatId) {
+        // Create send method
+        SendPhoto sendPhotoRequest = new SendPhoto(chatId, new InputFile(fileId));
+        // Set destination chat id
+        //sendPhotoRequest.setChatId(chatId);
+        // Set the photo url as a simple photo
+        //sendPhotoRequest.setPhoto(new InputFile(fileId));
+        send(sendPhotoRequest);
+    }
+
+    public void sendImageUploadingAFile(String filePath, String chatId) {
+        // Create send method
+        SendPhoto sendPhotoRequest = new SendPhoto(chatId, new InputFile(filePath));
+        // Set destination chat id
+        //sendPhotoRequest.setChatId(chatId);
+        // Set the photo file as a new photo (You can also use InputStream with a constructor overload)
+        //sendPhotoRequest.setPhoto(new InputFile(new File(filePath)));
+        send(sendPhotoRequest);
+    }
 }
 
