@@ -20,12 +20,18 @@ import org.telegram.telegrambots.meta.api.objects.chat.ChatFullInfo;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberAdministrator;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberOwner;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardRow;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import ru.alekseykonstantinov.interfaceImp.ChatHandler;
 import ru.alekseykonstantinov.telegrambot.group.WebFrontGroup;
 import ru.alekseykonstantinov.telegrambot.privatechat.PrivateChat;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -102,6 +108,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
             User user = update.getMessage().getFrom();
             log.info("Новый пользователь в приватном чате метод update.hasMyChatMember() {}", getUserData(user));
             sendMessageNewUser(chat, user);
+            sendCustomKeyboard(update.getMessage().getChatId().toString());
         }
 
         // при удалении участника
@@ -428,7 +435,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
     }
 
     /**
-     * Отправить stiker
+     * Отправить sticker
      *
      * @param update
      * @param Sticker_file_id ид на серверах telegram
@@ -450,6 +457,101 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
 
         } catch (TelegramApiException e) {
             log.error("Ошибка отправки стикера: {}", e.getMessage());
+        }
+    }
+
+    //пользовательские клавиатуры
+
+    /**
+     * Пользовательские клавиатуры можно добавлять к сообщениям с помощью setReplyMarkup.
+     * В этом примере мы создадим простую ReplyKeyboardMarkup с двумя строками и тремя кнопками в каждой строке,
+     * но вы также можете использовать другие типы, такие как ReplyKeyboardHide, ForceReply или InlineKeyboardMarkup :
+     *
+     * @param chatId
+     */
+    public void sendCustomKeyboard(String chatId) {
+        SendMessage message = new SendMessage(chatId, "Custom message text");
+        //        message.setChatId(chatId);
+        //        message.setText("Custom message text");
+
+        // Create the keyboard (list of keyboard rows)
+        List<KeyboardRow> keyboard = new ArrayList<>();
+        // Create a keyboard row
+        KeyboardRow row = new KeyboardRow();
+        // Set each button, you can also use KeyboardButton objects if you need something else than text
+        row.add("Row 1 Button 1");
+        row.add("Row 1 Button 2");
+        row.add("Row 1 Button 3");
+        // Add the first row to the keyboard
+        keyboard.add(row);
+        // Create another keyboard row
+        row = new KeyboardRow();
+        // Set each button for the second line
+        row.add("Row 2 Button 1");
+        row.add("Row 2 Button 2");
+        row.add("Row 2 Button 3");
+        // Add the second row to the keyboard
+        keyboard.add(row);
+
+        // Create ReplyKeyboardMarkup object
+        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup(keyboard);
+        // Set the keyboard to the markup
+        //keyboardMarkup.setKeyboard(keyboard);
+        // Add it to the message
+        message.setReplyMarkup(keyboardMarkup);
+
+        try {
+            // Send the message
+            telegramClient.execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Что-то пошло не так с отправкой кнопок Keyboard: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * InlineKeyboardMarkup использует список для захвата кнопок вместо KeyboardRow.
+     *
+     * @param chatId
+     */
+    public void sendInlineKeyboard(String chatId) {
+        // Создаем сообщение с текстом
+        SendMessage message = SendMessage.builder()
+                .chatId(chatId)
+                .text("Inline model below.")
+                .build();
+
+        // Создаем кнопки через билдер
+        InlineKeyboardButton youtubeBtn = InlineKeyboardButton.builder()
+                .text("YouTube")
+                .url("https://youtube.com")
+                .build();
+
+        InlineKeyboardButton githubBtn = InlineKeyboardButton.builder()
+                .text("GitHub")
+                .url("https://github.com")
+                .build();
+
+        // Создаем ряды кнопок (важно использовать InlineKeyboardRow)
+        List<InlineKeyboardRow> keyboard = new ArrayList<>();
+
+        // Создаем первый ряд и добавляем кнопки
+        InlineKeyboardRow row1 = new InlineKeyboardRow();
+        row1.add(youtubeBtn);
+        row1.add(githubBtn);
+        keyboard.add(row1);
+
+        // Создаем разметку клавиатуры
+        InlineKeyboardMarkup keyboardMarkup = InlineKeyboardMarkup.builder()
+                .keyboard(keyboard)  // Теперь передаем List<InlineKeyboardRow>
+                .build();
+
+        message.setReplyMarkup(keyboardMarkup);
+
+        try {
+            // Send the message
+            telegramClient.execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
         }
     }
 }

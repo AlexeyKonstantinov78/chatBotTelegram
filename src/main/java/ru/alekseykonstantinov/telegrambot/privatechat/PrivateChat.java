@@ -20,6 +20,8 @@ public class PrivateChat implements ChatHandler {
     @Override
     public void handleUpdate(Update update) {
         if (update.hasMessage()) {
+            // bot.sendCustomKeyboard(update.getMessage().getChatId().toString());
+            bot.sendInlineKeyboard(update.getMessage().getChatId().toString());
             if (update.getMessage().getFrom() != null) {
                 ChatMember chatMember = bot.getChatMember(update);
                 log.info("Информация о member: {}", toPrettyJson(chatMember));
