@@ -6,13 +6,22 @@ import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateC
 import org.telegram.telegrambots.meta.api.methods.ActionType;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.botapimethods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChat;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatAdministrators;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMemberCount;
 import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.chat.Chat;
+import org.telegram.telegrambots.meta.api.objects.chat.ChatFullInfo;
+import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
+import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberAdministrator;
+import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberOwner;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
+import ru.alekseykonstantinov.interfaceImp.ChatHandler;
 import ru.alekseykonstantinov.telegrambot.group.WebFrontGroup;
 import ru.alekseykonstantinov.telegrambot.privatechat.PrivateChat;
 
@@ -27,10 +36,14 @@ import static ru.alekseykonstantinov.utilites.Utilities.getUserData;
 public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
     protected TelegramClient telegramClient;
     private final String TOKEN;
+    private final ChatHandler webFrontGroup;
+    private final ChatHandler privateChat;
 
     public MyBotTelegram(String TOKEN) {
         telegramClient = new OkHttpTelegramClient(TOKEN);
         this.TOKEN = TOKEN;
+        this.webFrontGroup = new WebFrontGroup(this);
+        this.privateChat = new PrivateChat(this);
     }
 
 //    @Override
@@ -57,12 +70,14 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         if (update.hasMessage()
                 && update.getMessage().getChat().getType().equals("supergroup")
                 && update.getMessage().getChat().getTitle().equals(TELEGRAM_BOT_GROUP_FRONT_NAME)) {
-            new WebFrontGroup(TOKEN).consumeGroup(update);
+            //new WebFrontGroup().consumeGroup(update);
+            webFrontGroup.handleUpdate(update);
         }
 
         // обработка сообщений полученных от приватного чата
         if (update.hasMessage() && update.getMessage().getChat().getType().equalsIgnoreCase("private")) {
-            new PrivateChat(TOKEN).consumePrivate(update);
+            //new PrivateChat().consumePrivate(update);
+            privateChat.handleUpdate(update);
         }
 
         //При добавлении нового участника
@@ -311,6 +326,102 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         } catch (NullPointerException e) {
             log.error("Стаким именем файла скорее всего нет: {}", name);
             return "";
+        }
+    }
+
+    /**
+     * Получение данных о чате
+     *
+     * @param chatId ид чата
+     * @return class ChatFullInfo
+     */
+    public ChatFullInfo getChat(Long chatId) {
+        GetChat getChat = new GetChat(chatId.toString());
+        ChatFullInfo infoChat;
+        try {
+            infoChat = telegramClient.execute(getChat);
+        } catch (TelegramApiException e) {
+            log.error("Не получили информацию о чате: {}", e.getMessage());
+            return null;
+        }
+        return infoChat;
+    }
+
+    /**
+     * Получение списка Администраторов и владельца группы
+     *
+     * @param update данные при событии
+     */
+    public List<ChatMember> getChatAdministrators(Update update) {
+        Long chatId = update.getMessage().getChat().getId();
+        List<ChatMember> administrators;
+
+        try {
+            GetChatAdministrators getChatAdministrators = new GetChatAdministrators(chatId.toString());
+            administrators = telegramClient.execute(getChatAdministrators);
+
+        } catch (TelegramApiException e) {
+            log.error("Ошибка получения списка админов данных: {}", e.getMessage());
+            return null;
+        }
+        return administrators;
+    }
+
+    /**
+     * Получает данные member из группы которые разрешены
+     *
+     * @param update событие
+     * @return class ChatMember
+     */
+    public ChatMember getChatMember(Update update) {
+        ChatMember chatMemberUser;
+        Long chatId = update.getMessage().getChatId();
+        Long userId = update.getMessage().getFrom().getId();
+        GetChatMember getChatMember = new GetChatMember(chatId.toString(), userId);
+        try {
+            chatMemberUser = telegramClient.execute(getChatMember);
+        } catch (TelegramApiException e) {
+            log.error("Ошибка получения данных члена: {}", e.getMessage());
+            return null;
+        }
+
+        return chatMemberUser;
+    }
+
+    /**
+     * Получаем количество участников группы
+     *
+     * @param update событие данные
+     * @return количество members
+     */
+    public Integer getChatMemberCount(Update update) {
+        Long chatId = update.getMessage().getChat().getId();
+        Integer chatMemberCount;
+
+        try {
+            GetChatMemberCount getChatMemberCount = new GetChatMemberCount(chatId.toString());
+            chatMemberCount = telegramClient.execute(getChatMemberCount);
+
+        } catch (TelegramApiException e) {
+            log.error("Ошибка получения количества членов группы: {}", e.getMessage());
+            return null;
+        }
+        return chatMemberCount;
+    }
+
+    /**
+     * Роли группы участников
+     *
+     * @param member данные участника
+     * @return тип участника
+     */
+    public String getMemberRole(ChatMember member) {
+        if (member instanceof ChatMemberOwner) {
+            return "Владелец";
+        } else if (member instanceof ChatMemberAdministrator) {
+            return "Администратор";
+        } else {
+            return "Участник";
         }
     }
 }
