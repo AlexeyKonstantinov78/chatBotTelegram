@@ -43,7 +43,12 @@ public class PrivateChat implements ChatHandler {
                     || message.equalsIgnoreCase("hello")) {
                 bot.sendImageUploadingAFileJpg("ulybashka", chatId.toString());
             }
+        }
 
+        if (update.getMessage().hasSticker()) {
+            String sticker_file_id = update.getMessage().getSticker().getFileId();
+            System.out.println(sticker_file_id);
+            bot.stickerSender(update, sticker_file_id);
         }
     }
 

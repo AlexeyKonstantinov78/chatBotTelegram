@@ -433,7 +433,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      * @param update
      * @param Sticker_file_id ид на серверах telegram
      */
-    private void StickerSender(Update update, String Sticker_file_id) {
+    public void stickerSender(Update update, String Sticker_file_id) {
         //the ChatId that  we received form Update class
         String ChatId = update.getMessage().getChatId().toString();
         // Create an InputFile containing Sticker's file_id or URL
@@ -441,13 +441,15 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         // Create a SendSticker object using the ChatId and StickerFile
         SendSticker TheSticker = new SendSticker(ChatId, StickerFile);
 
+
         // Will reply the sticker to the message sent
         //TheSticker.setReplyToMessageId(update.getMessage().getMessageId());
 
         try {  // Execute the method
             telegramClient.execute(TheSticker);
+
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            log.error("Ошибка отправки стикера: {}", e.getMessage());
         }
     }
 }
