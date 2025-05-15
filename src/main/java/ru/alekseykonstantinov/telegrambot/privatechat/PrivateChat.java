@@ -11,7 +11,6 @@ import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberOwner;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.alekseykonstantinov.telegrambot.MyBotTelegram;
 
-import static ru.alekseykonstantinov.config.Config.TELEGRAM_BOT_GROUP_FRONT_NAME;
 import static ru.alekseykonstantinov.utilites.Utilities.toPrettyJson;
 
 @Slf4j
@@ -26,7 +25,7 @@ public class PrivateChat extends MyBotTelegram {
             if (update.getMessage().getFrom() != null) {
                 ChatMember chatMember = getChatMember(update);
                 log.info("Информация о member: {}", toPrettyJson(chatMember));
-                log.info("Роль в группе: {}", getMemberRole(chatMember));
+                log.info("Роль о приватном чате: {}", getMemberRole(chatMember));
             }
             if (update.getMessage().getChat() != null) {
                 Long chatId = update.getMessage().getChatId();
@@ -37,7 +36,7 @@ public class PrivateChat extends MyBotTelegram {
 
         if (update.hasMessage() && update.getMessage().hasText()) {
             String message = update.getMessage().getText();
-            log.info("Получено сообщение в группе: {}{}{}", TELEGRAM_BOT_GROUP_FRONT_NAME, " message:  ", message);
+            log.info("Получено сообщение в приватном чате: {}{}", " message:  ", message);
             Long chatId = update.getMessage().getChatId();
             sendMessageGetChatId(chatId, message);
 
