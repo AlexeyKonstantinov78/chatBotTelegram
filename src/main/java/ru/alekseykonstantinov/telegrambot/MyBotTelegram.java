@@ -60,6 +60,11 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
             new WebFrontGroup(TOKEN).consumeGroup(update);
         }
 
+        // обработка сообщений полученных от приватного чата
+        if (update.hasMessage() && update.getMessage().getChat().getType().equalsIgnoreCase("private")) {
+            new PrivateChat(TOKEN).consumePrivate(update);
+        }
+
         //При добавлении нового участника
         if (update.hasMessage() && !update.getMessage().getNewChatMembers().isEmpty()) {
 
@@ -69,11 +74,6 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
                         log.info("Новый пользователь метод update.getMessage().getNewChatMembers() {}", getUserData(user));
                         sendMessageNewUser(chat, user);
                     });
-        }
-
-        // обработка сообщений полученных от приватного чата
-        if (update.hasMessage() && update.getMessage().getChat().getType().equalsIgnoreCase("private")) {
-            new PrivateChat(TOKEN).consumePrivate(update);
         }
 
         // Новый приватный чат с ботом
