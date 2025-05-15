@@ -7,7 +7,6 @@ import ru.alekseykonstantinov.telegrambot.MyBotTelegram;
 
 import static ru.alekseykonstantinov.config.Config.TELEGRAM_BOT_TOKEN;
 
-
 @Slf4j
 public class Main {
     public static void main(String[] args) {
@@ -19,7 +18,6 @@ public class Main {
             botsApplication.registerBot(TELEGRAM_BOT_TOKEN, new MyBotTelegram(TELEGRAM_BOT_TOKEN));
         } catch (TelegramApiException e) {
             log.error("TelegramApiException: {}", e.getMessage());
-
         } catch (Exception e) {
             log.error("Exception: {}", e.getMessage());
         }
