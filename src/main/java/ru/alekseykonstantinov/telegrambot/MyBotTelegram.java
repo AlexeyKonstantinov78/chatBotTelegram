@@ -13,6 +13,7 @@ import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMem
 import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
 import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.chat.Chat;
 import org.telegram.telegrambots.meta.api.objects.chat.ChatFullInfo;
@@ -31,6 +32,7 @@ import java.util.Objects;
 
 import static ru.alekseykonstantinov.config.Config.TELEGRAM_BOT_GROUP_FRONT_NAME;
 import static ru.alekseykonstantinov.utilites.Utilities.getUserData;
+import static ru.alekseykonstantinov.utilites.Utilities.toPrettyJson;
 
 @Slf4j
 public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
@@ -46,11 +48,11 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         this.privateChat = new PrivateChat(this);
     }
 
-//    @Override
-//    public void consume(List<Update> updates) {
-//        LongPollingSingleThreadUpdateConsumer.super.consume(updates);
-//        log.info(toPrettyJson(updates));
-//    }
+    @Override
+    public void consume(List<Update> updates) {
+        LongPollingSingleThreadUpdateConsumer.super.consume(updates);
+        log.info(toPrettyJson(updates));
+    }
 
     @Override
     public void consume(Update update) {
@@ -422,6 +424,30 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
             return "Администратор";
         } else {
             return "Участник";
+        }
+    }
+
+    /**
+     * Отправить stiker
+     *
+     * @param update
+     * @param Sticker_file_id ид на серверах telegram
+     */
+    private void StickerSender(Update update, String Sticker_file_id) {
+        //the ChatId that  we received form Update class
+        String ChatId = update.getMessage().getChatId().toString();
+        // Create an InputFile containing Sticker's file_id or URL
+        InputFile StickerFile = new InputFile(Sticker_file_id);
+        // Create a SendSticker object using the ChatId and StickerFile
+        SendSticker TheSticker = new SendSticker(ChatId, StickerFile);
+
+        // Will reply the sticker to the message sent
+        //TheSticker.setReplyToMessageId(update.getMessage().getMessageId());
+
+        try {  // Execute the method
+            telegramClient.execute(TheSticker);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
         }
     }
 }
