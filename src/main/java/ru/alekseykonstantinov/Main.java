@@ -11,11 +11,13 @@ import static ru.alekseykonstantinov.config.Config.TELEGRAM_BOT_TOKEN;
 public class Main {
     public static void main(String[] args) {
 
-        try {
+        try (TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication();) {
             // Instantiate Telegram Bots API
-            TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication();
+
             // TODO Register our bot
             botsApplication.registerBot(TELEGRAM_BOT_TOKEN, new MyBotTelegram(TELEGRAM_BOT_TOKEN));
+            log.info("bot started!");
+            Thread.currentThread().join();
         } catch (TelegramApiException e) {
             log.error("TelegramApiException: {}", e.getMessage());
         } catch (Exception e) {
