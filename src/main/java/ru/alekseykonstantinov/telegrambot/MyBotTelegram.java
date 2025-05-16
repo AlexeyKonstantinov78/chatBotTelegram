@@ -99,7 +99,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
             privateChat.handleUpdate(update);
         }
 
-        //При добавлении нового участника
+        //При добавлении нового участника приветствие
         if (update.hasMessage() && !update.getMessage().getNewChatMembers().isEmpty()) {
 
             Chat chat = update.getMessage().getChat();
@@ -110,7 +110,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
                     });
         }
 
-        // Новый приватный чат с ботом
+        // Новый приветствие приватный чат с ботом
         if (update.hasMessage() && update.getMessage().hasEntities()
                 && update.getMessage().getChat().getType().equals("private")
                 && update.getMessage().getEntities().getFirst().getType().equals("bot_command")
@@ -203,7 +203,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      * @param method ограничены методами BotApiMethod
      * @param
      */
-    public <T extends BotApiMethod> void send(T method) {
+    private <T extends BotApiMethod> void send(T method) {
         try {
             telegramClient.execute(method);
             log.info("send: {}", "success");
@@ -213,7 +213,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         }
     }
 
-    public <T extends SendPhoto> void send(T method) {
+    private <T extends SendPhoto> void send(T method) {
         try {
             telegramClient.execute(method);
             log.info("send: {}", "success");
@@ -222,6 +222,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
             log.error("Что то пошло не так send: {}", e.getMessage());
         }
     }
+
 
     /**
      * Извлечет PhotoSize из фотографии,
@@ -245,6 +246,10 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         return null;
     }
 
+    public String getPhotoFieldId(PhotoSize photoSize) {
+        return photoSize.getFileId();
+    }
+
     /**
      * Метод обработает оба (у нас есть два варианта: file_path уже есть или нам нужно его получить)
      * варианта и вернет финальный file_path:
@@ -252,7 +257,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      * @param photo PhotoSize
      * @return string path
      */
-    public String getFilePath(PhotoSize photo) {
+    public String getFilePhotoPath(PhotoSize photo) {
         Objects.requireNonNull(photo);
 
         if (photo.getFilePath() != null) { // If the file_path is already present, we are done!
@@ -310,7 +315,11 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      * @param chatId идентификатор чата
      */
     public void sendImageFromFileId(String fileId, String chatId) {
-        SendPhoto sendPhotoRequest = new SendPhoto(chatId, new InputFile(fileId));
+        SendPhoto sendPhotoRequest = SendPhoto.builder()
+                .chatId(chatId)
+                .photo(new InputFile(fileId))
+                .build();
+        //SendPhoto sendPhotoRequest = new SendPhoto(chatId, new InputFile(fileId));
         send(sendPhotoRequest);
     }
 
