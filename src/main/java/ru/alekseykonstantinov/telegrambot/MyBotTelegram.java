@@ -159,7 +159,11 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      * @param msg    сообщение
      */
     public void sendMessageGetChatId(Long chatId, String msg) {
-        SendMessage sendMessage = new SendMessage(chatId.toString(), msg);
+        //SendMessage sendMessage = new SendMessage(chatId.toString(), msg);
+        SendMessage sendMessage = SendMessage.builder()
+                .chatId(chatId)
+                .text(msg)
+                .build();
         send(sendMessage);
     }
 
@@ -170,7 +174,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      */
     public void chatActions(Update update) {
         String text = update.getMessage().getText();
-        String chatId = update.getMessage().getChatId().toString();
+        Long chatId = update.getMessage().getChatId();
         //sendChatAction.setChatId(update.getMessage().getChatId());
         ActionType actionType;
 
@@ -185,7 +189,11 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
             // For information: https://core.telegram.org/bots/api#sendchataction
             actionType = ActionType.UPLOAD_DOCUMENT;
         }
-        SendChatAction sendChatAction = new SendChatAction(chatId, actionType.name());
+        //SendChatAction sendChatAction = new SendChatAction(chatId, actionType.name());
+        SendChatAction sendChatAction = SendChatAction.builder()
+                .chatId(chatId)
+                .action(actionType.name())
+                .build();
         send(sendChatAction);
     }
 
@@ -683,14 +691,10 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         SendMessage message = new SendMessage(chatId, "Скрытие клавиатуры: ");
 
         // Создаем объект для скрытия клавиатуры
-        ReplyKeyboardRemove keyboardRemove = new ReplyKeyboardRemove(true, false);
-//        keyboardRemove.setRemoveKeyboard(true); // Основной параметр - скрыть клавиатуру
-//        keyboardRemove.setSelective(false); // Скрыть для всех пользователей (false) или только для определенных (true)
-
-//        ReplyKeyboardRemove keyboardRemove = ReplyKeyboardRemove.builder()
-//                .removeKeyboard(true)
-//                .selective(false)
-//                .build();
+        ReplyKeyboardRemove keyboardRemove = ReplyKeyboardRemove.builder()
+                .removeKeyboard(true)
+                .selective(false)
+                .build();
 
         message.setReplyMarkup(keyboardRemove);
         try {
