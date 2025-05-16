@@ -20,8 +20,10 @@ import org.telegram.telegrambots.meta.api.objects.chat.ChatFullInfo;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberAdministrator;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberOwner;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ForceReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardRow;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -108,7 +110,6 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
             User user = update.getMessage().getFrom();
             log.info("Новый пользователь в приватном чате метод update.hasMyChatMember() {}", getUserData(user));
             sendMessageNewUser(chat, user);
-            sendCustomKeyboard(update.getMessage().getChatId().toString());
         }
 
         // при удалении участника
@@ -552,6 +553,57 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
             telegramClient.execute(message);
         } catch (TelegramApiException e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * ForceReplyKeyboard
+     *
+     * @param chatId
+     */
+    public void sendCustomForceReplyKeyboard(String chatId) {
+
+        SendMessage message = new SendMessage(chatId, "Пожалуйста, введите ваш ответ:");
+
+        // Создание ForceReply клавиатуры
+        ForceReplyKeyboard forceReplyKeyboard = new ForceReplyKeyboard();
+        forceReplyKeyboard.setInputFieldPlaceholder("Введите текст здесь...");
+        forceReplyKeyboard.setSelective(false); // Показывать только определенным пользователям
+        message.setReplyMarkup(forceReplyKeyboard);
+
+        try {
+            // Send the message
+            telegramClient.execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Что-то пошло не так с отправкой кнопок Keyboard: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * ReplyKeyboardHide в более старых версиях API был переименован в ReplyKeyboardRemove
+     * скрытие клавиатуры
+     *
+     * @param chatId id
+     */
+    public void hideKeyboard(String chatId) {
+        SendMessage message = new SendMessage(chatId, "Выбирите действие: ");
+
+        // Создаем объект для скрытия клавиатуры
+        ReplyKeyboardRemove keyboardRemove = new ReplyKeyboardRemove(true, false);
+//        keyboardRemove.setRemoveKeyboard(true); // Основной параметр - скрыть клавиатуру
+//        keyboardRemove.setSelective(false); // Скрыть для всех пользователей (false) или только для определенных (true)
+
+//        ReplyKeyboardRemove keyboardRemove = ReplyKeyboardRemove.builder()
+//                .removeKeyboard(true)
+//                .selective(false)
+//                .build();
+
+        message.setReplyMarkup(keyboardRemove);
+        try {
+            // Send the message
+            telegramClient.execute(message);
+        } catch (TelegramApiException e) {
+            log.error("Что-то пошло не так с отправкой кнопок Keyboard: {}", e.getMessage());
         }
     }
 }
