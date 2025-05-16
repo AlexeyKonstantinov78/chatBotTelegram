@@ -203,7 +203,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      * @param method ограничены методами BotApiMethod
      * @param
      */
-    private <T extends BotApiMethod> void send(T method) {
+    public <T extends BotApiMethod> void send(T method) {
         try {
             telegramClient.execute(method);
             log.info("send: {}", "success");
@@ -213,7 +213,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         }
     }
 
-    private <T extends SendPhoto> void send(T method) {
+    public <T extends SendPhoto> void send(T method) {
         try {
             telegramClient.execute(method);
             log.info("send: {}", "success");
@@ -497,7 +497,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      * @param chatId
      */
     public void sendCustomKeyboard(String chatId) {
-        SendMessage message = new SendMessage(chatId, "Custom message text");
+        SendMessage message = new SendMessage(chatId, "Вот клавиатура");
         //        message.setChatId(chatId);
         //        message.setText("Custom message text");
 
@@ -528,13 +528,23 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         //keyboardMarkup.setKeyboard(keyboard);
         // Add it to the message
         message.setReplyMarkup(keyboardMarkup);
+        send(message);
+    }
 
-        try {
-            // Send the message
-            telegramClient.execute(message);
-        } catch (TelegramApiException e) {
-            log.error("Что-то пошло не так с отправкой кнопок Keyboard: {}", e.getMessage());
-        }
+    /**
+     * Скрывает пользовательскую клавиатуру
+     *
+     * @param chatId ид чата
+     */
+    public void sendKeyboardHide(Long chatId) {
+        // Hide the keyboard
+        SendMessage message = SendMessage
+                .builder()
+                .chatId(chatId)
+                .text("Keyboard hidden")
+                .replyMarkup(new ReplyKeyboardRemove(true))
+                .build();
+        send(message);
     }
 
     /**
@@ -575,13 +585,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
                 .build();
 
         message.setReplyMarkup(keyboardMarkup);
-
-        try {
-            // Send the message
-            telegramClient.execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
+        send(message);
     }
 
     /**
@@ -599,12 +603,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         forceReplyKeyboard.setSelective(false); // Показывать только определенным пользователям
         message.setReplyMarkup(forceReplyKeyboard);
 
-        try {
-            // Send the message
-            telegramClient.execute(message);
-        } catch (TelegramApiException e) {
-            log.error("Что-то пошло не так с отправкой кнопок Keyboard: {}", e.getMessage());
-        }
+        send(message);
     }
 
     /**
@@ -630,6 +629,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         SetMyCommands setMyCommands = new SetMyCommands(commands, new BotCommandScopeDefault(), "ru");
 
         //bot.execute(new SetMyCommands(commands, new BotCommandScopeDefault(), null));
+        send(setMyCommands);
 
         try {
             // Send the message

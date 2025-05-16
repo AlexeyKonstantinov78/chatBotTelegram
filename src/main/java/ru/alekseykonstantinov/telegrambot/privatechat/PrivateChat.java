@@ -1,10 +1,13 @@
 package ru.alekseykonstantinov.telegrambot.privatechat;
 
 import lombok.extern.slf4j.Slf4j;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.chat.ChatFullInfo;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.alekseykonstantinov.interfaceImp.ChatHandler;
 import ru.alekseykonstantinov.telegrambot.MyBotTelegram;
 
@@ -21,6 +24,12 @@ public class PrivateChat implements ChatHandler {
     @Override
     public void handleUpdate(Update update) {
         if (update.hasMessage()) {
+            if (update.getMessage().getText().equals("/markup")) {
+                sendKeyboard(update.getMessage().getChatId());
+            }
+            if (update.getMessage().getText().equals("/hide")) {
+                bot.sendKeyboardHide(update.getMessage().getChatId());
+            }
             //bot.sendCustomKeyboard(update.getMessage().getChatId().toString());
             //bot.sendCustomForceReplyKeyboard(update.getMessage().getChatId().toString());
             //bot.sendInlineKeyboard(update.getMessage().getChatId().toString());
@@ -75,5 +84,29 @@ public class PrivateChat implements ChatHandler {
 
         }
     }
+
+    /**
+     * Добавляем клавиатуру в приватный чат
+     *
+     * @param chatId ид чата
+     */
+    private void sendKeyboard(Long chatId) {
+        SendMessage message = SendMessage.builder()
+                .chatId(chatId)
+                .text("Твоя клавиатура")
+                .build();
+
+        message.setReplyMarkup(ReplyKeyboardMarkup
+                .builder()
+                .resizeKeyboard(true)
+                .oneTimeKeyboard(false)
+                .keyboardRow(new KeyboardRow("Row 1 Button 1", "Row 1 Button 2", "Row 1 Button 3"))
+                .keyboardRow(new KeyboardRow("Row 1 Button 1", "Row 1 Button 2", "Row 1 Button 3"))
+
+                .build()
+        );
+        bot.send(message);
+    }
+
 
 }
