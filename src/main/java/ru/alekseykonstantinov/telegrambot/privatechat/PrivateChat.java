@@ -1,6 +1,7 @@
 package ru.alekseykonstantinov.telegrambot.privatechat;
 
 import lombok.extern.slf4j.Slf4j;
+import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.chat.ChatFullInfo;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
@@ -61,6 +62,17 @@ public class PrivateChat implements ChatHandler {
             String sticker_file_id = update.getMessage().getSticker().getFileId();
             System.out.println(sticker_file_id);
             bot.stickerSender(update, sticker_file_id);
+        }
+
+        if (update.hasMessage() && update.getMessage().hasPhoto()) {
+            Long chat_id = update.getMessage().getChatId();
+//            List<PhotoSize> photos = update.getMessage().getPhoto();
+//            photos.stream().forEach(photoSize -> log.info(toPrettyJson(photoSize)));
+            PhotoSize ps = bot.getPhoto(update);
+            String photoFieldIdId = bot.getPhotoFieldId(ps);
+            //отправка полученного изображения
+            bot.sendImageFromFileId(photoFieldIdId, chat_id.toString());
+
         }
     }
 
