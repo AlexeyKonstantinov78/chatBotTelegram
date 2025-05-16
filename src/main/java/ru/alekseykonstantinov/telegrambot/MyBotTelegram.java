@@ -6,6 +6,8 @@ import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateC
 import org.telegram.telegrambots.meta.api.methods.ActionType;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.botapimethods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.commands.DeleteMyCommands;
+import org.telegram.telegrambots.meta.api.methods.commands.GetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChat;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatAdministrators;
@@ -67,6 +69,8 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
 
     @Override
     public void consume(Update update) {
+        clearBotCommands();
+        logCurrentCommands();
         //ChatActions, такие как «набор текста» или «запись голосового сообщения»
         if (update.hasMessage() && update.getMessage().hasText()) {
             chatActions(update);
@@ -613,7 +617,48 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
             telegramClient.execute(setMyCommands);
             log.info("Menu отправлено");
         } catch (TelegramApiException e) {
-            log.error("Что-то пошло не так с отправкой кнопок Keyboard: {}", e.getMessage());
+            log.error("Что-то пошло не так с отправкой кнопок menu: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Удаление всех команд (очистка меню)
+     */
+    public void clearBotCommands() {
+        DeleteMyCommands deleteMyCommands = new DeleteMyCommands();
+        // Пустой список команд
+//        List<BotCommand> commands = new ArrayList<>();
+//        commands.add(new BotCommand("", ""));
+//        SetMyCommands setMyCommands = new SetMyCommands(commands, new BotCommandScopeDefault(), "ru");
+
+//        List<BotCommand> commands = new ArrayList<>();
+//        commands.add(new BotCommand("/start", "начать работу"));
+//
+//        // Используем новый конструктор SetMyCommands
+//        SetMyCommands setMyCommands = SetMyCommands.builder()
+//                .commands(commands)
+//                .scope(new BotCommandScopeDefault())
+//                .build();
+        try {
+            // Send the message
+            telegramClient.execute(deleteMyCommands);
+            log.info("Menu clear");
+        } catch (TelegramApiException e) {
+            log.error("Что-то пошло не так с очисткой кнопок menu: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Проверка текущих команд
+     */
+    public void logCurrentCommands() {
+        try {
+            GetMyCommands getCommands = new GetMyCommands();
+            List<BotCommand> commands = telegramClient.execute(getCommands);
+            log.info("Список команд: {}", toPrettyJson(commands));
+
+        } catch (TelegramApiException e) {
+            log.error("Что-то пошло не так с получением списка команд: {}", e.getMessage());
         }
     }
 

@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.chat.ChatFullInfo;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.alekseykonstantinov.interfaceImp.ChatHandler;
 import ru.alekseykonstantinov.telegrambot.MyBotTelegram;
 
@@ -25,11 +24,14 @@ public class PrivateChat implements ChatHandler {
             //bot.sendCustomForceReplyKeyboard(update.getMessage().getChatId().toString());
             //bot.sendInlineKeyboard(update.getMessage().getChatId().toString());
             //bot.hideKeyboard(update.getMessage().getChatId().toString());
-            try {
-                bot.setCommandsMenu();
-            } catch (TelegramApiException e) {
-                log.error("Что то не так: {}", e.getMessage());
-            }
+
+            //bot.clearBotCommands();
+            //bot.logCurrentCommands();
+//            try {
+//                bot.setCommandsMenu();
+//            } catch (TelegramApiException e) {
+//                log.error("Что то не так с отправкой меню: {}", e.getMessage());
+//            }
             if (update.getMessage().getFrom() != null) {
                 ChatMember chatMember = bot.getChatMember(update);
                 log.info("Информация о member: {}", toPrettyJson(chatMember));
