@@ -24,6 +24,8 @@ import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberAdministrator;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberOwner;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
+import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeAllGroupChats;
+import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeAllPrivateChats;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ForceReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -625,7 +627,14 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      * Удаление всех команд (очистка меню)
      */
     public void clearBotCommands() {
-        DeleteMyCommands deleteMyCommands = new DeleteMyCommands();
+        DeleteMyCommands deleteMyCommandsBotCommandScopeDefault = new DeleteMyCommands();
+        DeleteMyCommands deleteMyCommandsBotCommandScopeAllPrivateChats = new DeleteMyCommands();
+        DeleteMyCommands deleteMyCommandsBotCommandScopeAllGroupChats = new DeleteMyCommands();
+
+        deleteMyCommandsBotCommandScopeDefault.setScope(new BotCommandScopeDefault());
+        deleteMyCommandsBotCommandScopeAllPrivateChats.setScope(new BotCommandScopeAllPrivateChats());
+        deleteMyCommandsBotCommandScopeAllGroupChats.setScope(new BotCommandScopeAllGroupChats());
+
         // Пустой список команд
 //        List<BotCommand> commands = new ArrayList<>();
 //        commands.add(new BotCommand("", ""));
@@ -641,7 +650,9 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
 //                .build();
         try {
             // Send the message
-            telegramClient.execute(deleteMyCommands);
+            telegramClient.execute(deleteMyCommandsBotCommandScopeDefault);
+            telegramClient.execute(deleteMyCommandsBotCommandScopeAllPrivateChats);
+            telegramClient.execute(deleteMyCommandsBotCommandScopeAllGroupChats);
             log.info("Menu clear");
         } catch (TelegramApiException e) {
             log.error("Что-то пошло не так с очисткой кнопок menu: {}", e.getMessage());
