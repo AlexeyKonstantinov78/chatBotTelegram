@@ -6,6 +6,7 @@ import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateC
 import org.telegram.telegrambots.meta.api.methods.ActionType;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.botapimethods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChat;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatAdministrators;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
@@ -20,6 +21,8 @@ import org.telegram.telegrambots.meta.api.objects.chat.ChatFullInfo;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberAdministrator;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberOwner;
+import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
+import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ForceReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -496,6 +499,8 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
 
         // Create ReplyKeyboardMarkup object
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup(keyboard);
+        keyboardMarkup.setResizeKeyboard(true); // подгоняем размер
+        keyboardMarkup.setOneTimeKeyboard(false); // клавиатура останется после использования
         // Set the keyboard to the markup
         //keyboardMarkup.setKeyboard(keyboard);
         // Add it to the message
@@ -580,13 +585,46 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
     }
 
     /**
+     * Меню с командами (команды в списке /menu)
+     * new BotCommandScopeDefault() область видимости меню
+     * Telegram Bot API предоставляет и другие варианты областей видимости:
+     * BotCommandScopeAllPrivateChats - только приватные чаты
+     * BotCommandScopeAllGroupChats - только групповые чаты
+     * BotCommandScopeAllChatAdministrators - только администраторы чатов
+     * BotCommandScopeChat - для конкретного чата
+     * BotCommandScopeChatAdministrators - только администраторы конкретного чата
+     * BotCommandScopeChatMember - для конкретного пользователя в конкретном чате
+     * languageCode - код языка (например, "en", "ru", "es" и т.д.)
+     *
+     * @throws TelegramApiException api
+     */
+    public void setCommandsMenu() throws TelegramApiException {
+        List<BotCommand> commands = new ArrayList<>();
+        commands.add(new BotCommand("/start", "начать работу"));
+        commands.add(new BotCommand("/help", "помощь"));
+        commands.add(new BotCommand("/settings", "настройки"));
+        commands.add(new BotCommand("/info", "информация о боте"));
+        SetMyCommands setMyCommands = new SetMyCommands(commands, new BotCommandScopeDefault(), "ru");
+
+        //bot.execute(new SetMyCommands(commands, new BotCommandScopeDefault(), null));
+
+        try {
+            // Send the message
+            telegramClient.execute(setMyCommands);
+            log.info("Menu отправлено");
+        } catch (TelegramApiException e) {
+            log.error("Что-то пошло не так с отправкой кнопок Keyboard: {}", e.getMessage());
+        }
+    }
+
+    /**
      * ReplyKeyboardHide в более старых версиях API был переименован в ReplyKeyboardRemove
      * скрытие клавиатуры
      *
      * @param chatId id
      */
     public void hideKeyboard(String chatId) {
-        SendMessage message = new SendMessage(chatId, "Выбирите действие: ");
+        SendMessage message = new SendMessage(chatId, "Скрытие клавиатуры: ");
 
         // Создаем объект для скрытия клавиатуры
         ReplyKeyboardRemove keyboardRemove = new ReplyKeyboardRemove(true, false);
