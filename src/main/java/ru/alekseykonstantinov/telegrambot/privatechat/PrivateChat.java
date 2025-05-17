@@ -23,13 +23,22 @@ public class PrivateChat implements ChatHandler {
 
     @Override
     public void handleUpdate(Update update) {
+        //bot.sendInlineKeyboard(bot.getChatId(update));
+
+        // обработка команд в приватном чате
+        if (update.hasMessage()
+                && update.getMessage().hasEntities()
+                && update.getMessage().getEntities().getFirst().getType().equalsIgnoreCase("bot_command")) {
+            String command = update.getMessage().getText();
+            Long chatId = bot.getChatId(update);
+            switch (command) {
+                case "/markup" -> sendKeyboard(chatId);
+                case "/hide" -> bot.sendKeyboardHide(chatId);
+            }
+            return;
+        }
+
         if (update.hasMessage()) {
-            if (update.getMessage().getText().equals("/markup")) {
-                sendKeyboard(update.getMessage().getChatId());
-            }
-            if (update.getMessage().getText().equals("/hide")) {
-                bot.sendKeyboardHide(update.getMessage().getChatId());
-            }
             //bot.sendCustomKeyboard(update.getMessage().getChatId().toString());
             //bot.sendCustomForceReplyKeyboard(update.getMessage().getChatId().toString());
             //bot.sendInlineKeyboard(update.getMessage().getChatId().toString());
@@ -57,13 +66,13 @@ public class PrivateChat implements ChatHandler {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String message = update.getMessage().getText();
             log.info("Получено сообщение в приватном чате: {}{}", " message:  ", message);
-            Long chatId = update.getMessage().getChatId();
+            Long chatId = bot.getChatId(update);
             bot.sendMessageGetChatId(chatId, message);
 
             //отправка изображения по названию
             if (message.equalsIgnoreCase("привет")
                     || message.equalsIgnoreCase("hello")) {
-                bot.sendImageUploadingAFileJpg("ulybashka", chatId.toString());
+                bot.sendImageUploadingAFileJpg("ulybashka", chatId);
             }
         }
 

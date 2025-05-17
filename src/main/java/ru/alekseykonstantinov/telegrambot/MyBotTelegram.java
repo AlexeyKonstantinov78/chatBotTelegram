@@ -174,8 +174,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      */
     public void chatActions(Update update) {
         String text = update.getMessage().getText();
-        Long chatId = update.getMessage().getChatId();
-        //sendChatAction.setChatId(update.getMessage().getChatId());
+        Long chatId = getChatId(update);
         ActionType actionType;
 
         if (text.equals("/type")) {
@@ -302,9 +301,12 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      * @param url    ссылка на фото
      * @param chatId идентификатор чата
      */
-    public void sendImageFromUrl(String url, String chatId) {
+    public void sendImageFromUrl(String url, Long chatId) {
         // Create send method
-        SendPhoto sendPhotoRequest = new SendPhoto(chatId, new InputFile(url));
+        SendPhoto sendPhotoRequest = SendPhoto.builder()
+                .chatId(chatId)
+                .photo(new InputFile(url))
+                .build();
         send(sendPhotoRequest);
     }
 
@@ -329,7 +331,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      * @param name   имя файла
      * @param chatId идентификатор чата
      */
-    public void sendImageUploadingAFileJpg(String name, String chatId) {
+    public void sendImageUploadingAFileJpg(String name, Long chatId) {
         sendImageUploadingAFile(getPathResourcesImageNameJpg(name), chatId);
     }
 
@@ -339,14 +341,17 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      * @param filePath путь к фото /image...
      * @param chatId   идентификатор чата
      */
-    public void sendImageUploadingAFile(String filePath, String chatId) {
+    public void sendImageUploadingAFile(String filePath, Long chatId) {
         java.io.File file = new java.io.File(filePath);
         // Проверка существования файла
         if (!file.exists()) {
             log.error("Файл не найден: {}", filePath);
         }
         // Create send method
-        SendPhoto sendPhotoRequest = new SendPhoto(chatId, new InputFile(file));
+        SendPhoto sendPhotoRequest = SendPhoto.builder()
+                .chatId(chatId)
+                .photo(new InputFile(file))
+                .build();
         send(sendPhotoRequest);
     }
 
@@ -372,7 +377,9 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      * @return class ChatFullInfo
      */
     public ChatFullInfo getChat(Long chatId) {
-        GetChat getChat = new GetChat(chatId.toString());
+        GetChat getChat = GetChat.builder()
+                .chatId(chatId)
+                .build();
         ChatFullInfo infoChat;
         try {
             infoChat = telegramClient.execute(getChat);
@@ -389,11 +396,13 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      * @param update данные при событии
      */
     public List<ChatMember> getChatAdministrators(Update update) {
-        Long chatId = update.getMessage().getChat().getId();
+        Long chatId = getChatId(update);
         List<ChatMember> administrators;
 
         try {
-            GetChatAdministrators getChatAdministrators = new GetChatAdministrators(chatId.toString());
+            GetChatAdministrators getChatAdministrators = GetChatAdministrators.builder()
+                    .chatId(chatId)
+                    .build();
             administrators = telegramClient.execute(getChatAdministrators);
 
         } catch (TelegramApiException e) {
@@ -411,7 +420,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      */
     public ChatMember getChatMember(Update update) {
         ChatMember chatMemberUser;
-        Long chatId = update.getMessage().getChatId();
+        Long chatId = getChatId(update);
         Long userId = update.getMessage().getFrom().getId();
         GetChatMember getChatMember = new GetChatMember(chatId.toString(), userId);
         try {
@@ -431,7 +440,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      * @return количество members
      */
     public Integer getChatMemberCount(Update update) {
-        Long chatId = update.getMessage().getChat().getId();
+        Long chatId = getChatId(update);
         Integer chatMemberCount;
 
         try {
@@ -469,18 +478,21 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      */
     public void stickerSender(Update update, String Sticker_file_id) {
         //the ChatId that  we received form Update class
-        String ChatId = update.getMessage().getChatId().toString();
+        Long chatId = getChatId(update);
         // Create an InputFile containing Sticker's file_id or URL
-        InputFile StickerFile = new InputFile(Sticker_file_id);
+        InputFile stickerFile = new InputFile(Sticker_file_id);
         // Create a SendSticker object using the ChatId and StickerFile
-        SendSticker TheSticker = new SendSticker(ChatId, StickerFile);
-
+        //SendSticker TheSticker = new SendSticker(ChatId, StickerFile);
+        SendSticker theSticker = SendSticker.builder()
+                .chatId(chatId)
+                .sticker(stickerFile)
+                .build();
 
         // Will reply the sticker to the message sent
         //TheSticker.setReplyToMessageId(update.getMessage().getMessageId());
 
         try {  // Execute the method
-            telegramClient.execute(TheSticker);
+            telegramClient.execute(theSticker);
 
         } catch (TelegramApiException e) {
             log.error("Ошибка отправки стикера: {}", e.getMessage());
@@ -552,22 +564,24 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      *
      * @param chatId
      */
-    public void sendInlineKeyboard(String chatId) {
+    public void sendInlineKeyboard(Long chatId) {
         // Создаем сообщение с текстом
         SendMessage message = SendMessage.builder()
                 .chatId(chatId)
-                .text("Inline model below.")
+                .text("Клавиатура")
                 .build();
 
         // Создаем кнопки через билдер
         InlineKeyboardButton youtubeBtn = InlineKeyboardButton.builder()
-                .text("YouTube")
+                .text("Показать клавиатуру")
+//                .copyText("/markup")
                 .url("https://youtube.com")
                 .build();
 
         InlineKeyboardButton githubBtn = InlineKeyboardButton.builder()
-                .text("GitHub")
-                .url("https://github.com")
+                .text("Убрать клавиатуру")
+                //.url("https://github.com")
+                .switchInlineQuery("/hide")
                 .build();
 
         // Создаем ряды кнопок (важно использовать InlineKeyboardRow)
@@ -593,10 +607,14 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      *
      * @param chatId
      */
-    public void sendCustomForceReplyKeyboard(String chatId) {
+    public void sendCustomForceReplyKeyboard(Long chatId) {
 
-        SendMessage message = new SendMessage(chatId, "Пожалуйста, введите ваш ответ:");
-
+        //SendMessage message = new SendMessage(chatId, "Пожалуйста, введите ваш ответ:");
+        String text = "Пожалуйста, введите ваш ответ:";
+        SendMessage message = SendMessage.builder()
+                .chatId(chatId)
+                .text(text)
+                .build();
         // Создание ForceReply клавиатуры
         ForceReplyKeyboard forceReplyKeyboard = new ForceReplyKeyboard();
         forceReplyKeyboard.setInputFieldPlaceholder("Введите текст здесь...");
@@ -712,6 +730,15 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         } catch (TelegramApiException e) {
             log.error("Что-то пошло не так с отправкой кнопок Keyboard: {}", e.getMessage());
         }
+    }
+
+    /**
+     * Получение чата ид
+     *
+     * @return chatId
+     */
+    public Long getChatId(Update update) {
+        return update.getMessage().getChatId();
     }
 }
 

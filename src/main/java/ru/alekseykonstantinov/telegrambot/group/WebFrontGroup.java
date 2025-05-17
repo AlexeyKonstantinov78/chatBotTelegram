@@ -55,13 +55,13 @@ public class WebFrontGroup implements ChatHandler {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String message = update.getMessage().getText();
             log.info("Получено сообщение в группе: {}{}{}", TELEGRAM_BOT_GROUP_FRONT_NAME, " message:  ", message);
-            Long chatId = update.getMessage().getChatId();
+            Long chatId = bot.getChatId(update);
             bot.sendMessageGetChatId(chatId, message);
 
             //отправка изображения по названию
             if (message.equalsIgnoreCase("привет")
                     || message.equalsIgnoreCase("hello")) {
-                bot.sendImageUploadingAFileJpg("ulybashka", chatId.toString());
+                bot.sendImageUploadingAFileJpg("ulybashka", chatId);
             }
         }
     }
