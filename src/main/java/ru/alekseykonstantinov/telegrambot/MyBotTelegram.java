@@ -38,6 +38,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import ru.alekseykonstantinov.interfaceImp.ChatHandler;
 import ru.alekseykonstantinov.telegrambot.group.WebFrontGroup;
+import ru.alekseykonstantinov.telegrambot.privatechat.BusinessPrivetChat;
 import ru.alekseykonstantinov.telegrambot.privatechat.PrivateChat;
 
 import java.util.ArrayList;
@@ -45,40 +46,34 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-import static ru.alekseykonstantinov.config.Config.TELEGRAM_BOT_GROUP_FRONT_NAME;
 import static ru.alekseykonstantinov.utilites.Utilities.getUserData;
 import static ru.alekseykonstantinov.utilites.Utilities.toPrettyJson;
 
 @Slf4j
 public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
-    protected TelegramClient telegramClient;
+    public TelegramClient telegramClient;
     private final String TOKEN;
     private final ChatHandler webFrontGroup;
     private final ChatHandler privateChat;
+    private final ChatHandler businessPrivetChat;
 
     public MyBotTelegram(String TOKEN) {
         telegramClient = new OkHttpTelegramClient(TOKEN);
         this.TOKEN = TOKEN;
         this.webFrontGroup = new WebFrontGroup(this);
         this.privateChat = new PrivateChat(this);
-    }
-
-    @Override
-    public void consume(List<Update> updates) {
-        LongPollingSingleThreadUpdateConsumer.super.consume(updates);
-        log.info(toPrettyJson(updates));
+        this.businessPrivetChat = new BusinessPrivetChat(this);
     }
 
     @Override
     public void consume(Update update) {
         clearBotCommands();
         logCurrentCommands();
-        //ChatActions, такие как «набор текста» или «запись голосового сообщения»
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            chatActions(update);
-        }
+        technicalInfo(update);
 
         if (update.hasMessage() && update.getMessage().hasText()) {
+            //ChatActions, такие как «набор текста» или «запись голосового сообщения»
+            chatActions(update);
             String message = update.getMessage().getText();
             log.info("Получено сообщение: {}", message);
             //Long chatId = update.getMessage().getChatId();
@@ -87,39 +82,76 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
 
         // обработка сообщений полученных от группы
         if (update.hasMessage()
-                && update.getMessage().getChat().getType().equals("supergroup")
-                && update.getMessage().getChat().getTitle().equals(TELEGRAM_BOT_GROUP_FRONT_NAME)) {
+                && (update.getMessage().getChat().isSuperGroupChat() || update.getMessage().getChat().isGroupChat())) {
             //new WebFrontGroup().consumeGroup(update);
             webFrontGroup.handleUpdate(update);
         }
 
         // обработка сообщений полученных от приватного чата
-        if (update.hasMessage() && update.getMessage().getChat().getType().equalsIgnoreCase("private")) {
+        if (update.hasMessage() && update.getMessage().getChat().isUserChat()) {
             //new PrivateChat().consumePrivate(update);
             privateChat.handleUpdate(update);
         }
 
-        //При добавлении нового участника приветствие
-        if (update.hasMessage() && !update.getMessage().getNewChatMembers().isEmpty()) {
+        // обработка сообщений полученных от BusinessMessage Bot приватного чата
+        if (update.hasBusinessMessage() && update.getBusinessMessage().getChat().isUserChat()) {
+            businessPrivetChat.handleUpdate(update);
+        }
 
+        // обработка сообщений полученных от BusinessMessage Bot приватного чата
+        if (update.hasBusinessMessage()
+                && (update.getBusinessMessage().getChat().isSuperGroupChat() || update.getBusinessMessage().getChat().isGroupChat())) {
+            log.info("чат supergroup и group группа бизнес Bot");
+        }
+
+        //При добавлении нового участника приветствие в группе
+        if (update.hasMessage() && !update.getMessage().getNewChatMembers().isEmpty()) {
             Chat chat = update.getMessage().getChat();
             update.getMessage().getNewChatMembers().stream()
                     .forEach(user -> {
-                        log.info("Новый пользователь метод update.getMessage().getNewChatMembers() {}", getUserData(user));
                         sendMessageNewUser(chat, user);
                     });
         }
 
-        // Новый приветствие приватный чат с ботом
+        // Новый приватный чат с ботом приветствие
         if (update.hasMessage() && update.getMessage().hasEntities()
-                && update.getMessage().getChat().getType().equals("private")
+                && update.getMessage().getChat().isUserChat()
                 && update.getMessage().getEntities().getFirst().getType().equals("bot_command")
                 && update.getMessage().getEntities().getFirst().getText().equals("/start")) {
             Chat chat = update.getMessage().getChat();
             User user = update.getMessage().getFrom();
-            log.info("Новый пользователь в приватном чате метод update.hasMyChatMember() {}", getUserData(user));
+
             sendMessageNewUser(chat, user);
         }
+    }
+
+    /**
+     *
+     */
+    public void technicalInfo(Update update) {
+        log.info(toPrettyJson(update));
+
+        log.info("ChannelPost: {}", update.hasChannelPost());
+
+        try {
+            log.info("Message isChannelChat: {}", update.getMessage().getChat().isChannelChat());
+            log.info("Message isUserChat: {}", update.getMessage().getChat().isUserChat());
+            log.info("Message isGroupChat: {}", update.getMessage().getChat().isGroupChat());
+            log.info("Message isSuperGroupChat: {}", update.getMessage().getChat().isSuperGroupChat());
+        } catch (Exception e) {
+            log.info("Message: {}", e.getMessage());
+        }
+
+        try {
+            log.info("BusinessMessage isChannelChat: {}", update.getBusinessMessage().getChat().isChannelChat());
+            log.info("BusinessMessage isUserChat: {}", update.getBusinessMessage().getChat().isUserChat());
+            log.info("BusinessMessage isGroupChat: {}", update.getBusinessMessage().getChat().isGroupChat());
+            log.info("BusinessMessage isSuperGroupChat: {}", update.getBusinessMessage().getChat().isSuperGroupChat());
+        } catch (Exception e) {
+            log.info("BusinessMessage: {}", e.getMessage());
+        }
+
+        log.info("BusinessConnection: {}", update.hasBusinessConnection());
 
         // при удалении участника
         if (update.hasMessage() && update.getMessage().getLeftChatMember() != null) {
@@ -137,7 +169,8 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      * @param user новый участник или юзер
      */
     public void sendMessageNewUser(Chat chat, User user) {
-        String msgGroup = chat.getType().equals("supergroup")
+        Boolean isGroup = chat.isSuperGroupChat();
+        String msgGroup = isGroup
                 ? "в группу " + chat.getTitle()
                 : chat.getType().equals("private")
                 ? "в " + chat.getType() + " чат"
@@ -149,6 +182,13 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
                 user.getFirstName(),
                 msgGroup
         );
+
+        if (isGroup) {
+            log.info("Новый пользователь в группе {} {}", chat.getTitle(), getUserData(user));
+        } else {
+            log.info("Новый пользователь в приватном чате {}", getUserData(user));
+        }
+
         sendMessageGetChatId(chat.getId(), message);
     }
 
@@ -160,8 +200,26 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      */
     public void sendMessageGetChatId(Long chatId, String msg) {
         //SendMessage sendMessage = new SendMessage(chatId.toString(), msg);
+
         SendMessage sendMessage = SendMessage.builder()
                 .chatId(chatId)
+                .text(msg)
+                .build();
+        send(sendMessage);
+    }
+
+    /**
+     * Отправка сообщения в BusinessMessage Bot чат
+     *
+     * @param chatId чат ид
+     * @param msg    сообщение
+     */
+    public void sendMessageGetChatId(Long chatId, String businessConnectionId, String msg) {
+        //SendMessage sendMessage = new SendMessage(chatId.toString(), msg);
+
+        SendMessage sendMessage = SendMessage.builder()
+                .chatId(chatId)
+                .businessConnectionId(businessConnectionId)
                 .text(msg)
                 .build();
         send(sendMessage);
@@ -173,7 +231,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      * @param update событие
      */
     public void chatActions(Update update) {
-        String text = update.getMessage().getText();
+        String text = getChatText(update);
         Long chatId = getChatId(update);
         ActionType actionType;
 
@@ -194,6 +252,43 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
                 .action(actionType.name())
                 .build();
         send(sendChatAction);
+    }
+
+    /**
+     * Получение чата ид
+     *
+     * @return chatId
+     */
+    public Long getChatId(Update update) {
+
+        if (update.hasMessage()) {
+            return update.getMessage().getChatId();
+        }
+
+        if (update.hasBusinessMessage()) {
+            return update.getBusinessMessage().getChatId();
+        }
+        return null;
+    }
+
+    /**
+     * Получение чата ид
+     *
+     * @return chatId
+     */
+    public String getChatText(Update update) {
+        if (update.hasMessage()) {
+            return update.getMessage().getText();
+        }
+
+        if (update.hasBusinessMessage()) {
+            return update.getBusinessMessage().getText();
+        }
+        return null;
+    }
+
+    public String getBusinessConnectionId(Update update) {
+        return update.getBusinessMessage().getBusinessConnectionId();
     }
 
     /**
@@ -320,6 +415,25 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         SendPhoto sendPhotoRequest = SendPhoto.builder()
                 .chatId(chatId)
                 .photo(new InputFile(fileId))
+                .build();
+        //SendPhoto sendPhotoRequest = new SendPhoto(chatId, new InputFile(fileId));
+        send(sendPhotoRequest);
+    }
+
+    /**
+     * Отправка фото по fileId business чат
+     *
+     * @param fileId               идентификатор фото на серверах telegram
+     * @param chatId               идентификатор чата
+     * @param caption              описание или подпись
+     * @param businessConnectionId id business чата     *
+     */
+    public void sendImageFromFileId(String fileId, Long chatId, String caption, String businessConnectionId) {
+        SendPhoto sendPhotoRequest = SendPhoto.builder()
+                .chatId(chatId)
+                .businessConnectionId(businessConnectionId)
+                .photo(new InputFile(fileId))
+                .caption(caption)
                 .build();
         //SendPhoto sendPhotoRequest = new SendPhoto(chatId, new InputFile(fileId));
         send(sendPhotoRequest);
@@ -732,13 +846,6 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         }
     }
 
-    /**
-     * Получение чата ид
-     *
-     * @return chatId
-     */
-    public Long getChatId(Update update) {
-        return update.getMessage().getChatId();
-    }
+
 }
 
