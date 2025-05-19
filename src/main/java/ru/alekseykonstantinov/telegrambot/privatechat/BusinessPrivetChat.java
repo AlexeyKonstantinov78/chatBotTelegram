@@ -11,10 +11,9 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.alekseykonstantinov.interfaceImp.ChatHandler;
 import ru.alekseykonstantinov.telegrambot.MyBotTelegram;
 
-import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 
+import static ru.alekseykonstantinov.utilites.Utilities.MessageGreeting;
 import static ru.alekseykonstantinov.utilites.Utilities.getIsMessageArrays;
 
 @Slf4j
@@ -24,9 +23,6 @@ public class BusinessPrivetChat implements ChatHandler {
     private String botUserName;
     private Long botId;
     private String botPhotoFieldId;
-    private final List<String> MessageGreeting =
-            Arrays.asList("Привет", "Hello", "Хай", "Салют", "Добрый", "Доброе", "Приветствую", "Здорово", "Приветик", "Дарова", "Хэлло", "✋🏻", "🖖🏻");
-
 
     public BusinessPrivetChat(MyBotTelegram bot) {
         this.bot = bot;

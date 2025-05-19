@@ -8,17 +8,11 @@ import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import ru.alekseykonstantinov.interfaceImp.ChatHandler;
 import ru.alekseykonstantinov.telegrambot.MyBotTelegram;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static ru.alekseykonstantinov.utilites.Utilities.getIsMessageArrays;
-import static ru.alekseykonstantinov.utilites.Utilities.toPrettyJson;
+import static ru.alekseykonstantinov.utilites.Utilities.*;
 
 @Slf4j
 public class PrivateChat implements ChatHandler {
     private final MyBotTelegram bot;
-    private final List<String> MessageGreeting =
-            Arrays.asList("Привет", "Hello", "Хай", "Салют", "Добрый", "Доброе", "Приветствую", "Здорово", "Приветик", "Дарова", "Хэлло", "✋🏻", "🖖🏻");
 
     public PrivateChat(MyBotTelegram bot) {
         this.bot = bot;

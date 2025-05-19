@@ -5,10 +5,13 @@ import com.google.gson.GsonBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.User;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
 public class Utilities {
+    public static final List<String> MessageGreeting =
+            Arrays.asList("Привет", "Hello", "Хай", "Салют", "Добрый", "Доброе", "Приветствую", "Здорово", "Приветик", "Дарова", "Хэлло", "✋🏻", "🖖🏻");
 
     /**
      * @param user юзер
