@@ -25,10 +25,9 @@ public class Config {
             TELEGRAM_BOT_GROUP_FRONT_NAME = props.getProperty("telegram.bot.group.name.front");
 
         } catch (IOException e) {
-
-            log.error("Ошибка загрузки config.properties: " + e.getMessage());
+            log.error("Ошибка загрузки config.properties IOException: {}", e.getMessage());
         } catch (RuntimeException e) {
-            log.error("Ошибка загрузки config.properties: " + e.getMessage());
+            log.error("Ошибка загрузки config.properties RuntimeException: {}", e.getMessage());
         }
     }
 }
