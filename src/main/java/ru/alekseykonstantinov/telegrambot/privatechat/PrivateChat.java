@@ -17,7 +17,8 @@ import static ru.alekseykonstantinov.utilites.Utilities.toPrettyJson;
 @Slf4j
 public class PrivateChat implements ChatHandler {
     private final MyBotTelegram bot;
-    private final List<String> MessageGreeting = Arrays.asList("Привет", "Hello", "Хай", "Салют", "Добрый", "Доброе");
+    private final List<String> MessageGreeting =
+            Arrays.asList("Привет", "Hello", "Хай", "Салют", "Добрый", "Доброе", "Приветствую", "Здорово", "Приветик", "Дарова", "Хэлло", "✋🏻", "🖖🏻");
 
     public PrivateChat(MyBotTelegram bot) {
         this.bot = bot;

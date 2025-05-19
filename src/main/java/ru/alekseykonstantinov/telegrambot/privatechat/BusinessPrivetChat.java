@@ -24,7 +24,8 @@ public class BusinessPrivetChat implements ChatHandler {
     private String botUserName;
     private Long botId;
     private String botPhotoFieldId;
-    private final List<String> MessageGreeting = Arrays.asList("Привет", "Hello", "Хай", "Салют", "Добрый", "Доброе");
+    private final List<String> MessageGreeting =
+            Arrays.asList("Привет", "Hello", "Хай", "Салют", "Добрый", "Доброе", "Приветствую", "Здорово", "Приветик", "Дарова", "Хэлло", "✋🏻", "🖖🏻");
 
 
     public BusinessPrivetChat(MyBotTelegram bot) {
