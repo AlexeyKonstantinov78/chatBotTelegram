@@ -11,7 +11,11 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.alekseykonstantinov.interfaceImp.ChatHandler;
 import ru.alekseykonstantinov.telegrambot.MyBotTelegram;
 
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
+
+import static ru.alekseykonstantinov.utilites.Utilities.getIsMessageArrays;
 
 @Slf4j
 public class BusinessPrivetChat implements ChatHandler {
@@ -20,6 +24,7 @@ public class BusinessPrivetChat implements ChatHandler {
     private String botUserName;
     private Long botId;
     private String botPhotoFieldId;
+    private final List<String> MessageGreeting = Arrays.asList("Привет", "Hello", "Хай", "Салют", "Добрый", "Доброе");
 
 
     public BusinessPrivetChat(MyBotTelegram bot) {
@@ -36,12 +41,10 @@ public class BusinessPrivetChat implements ChatHandler {
         User user = update.getBusinessMessage().getFrom();
         String capture = String.format("@%1s %2s", botUserName, botName);
 
-        if (!message.isEmpty() && (message.equalsIgnoreCase("Привет")
-                || message.equalsIgnoreCase("Hello")
-                || message.equalsIgnoreCase("Хай")
-                || message.equalsIgnoreCase("Салют")
-                || message.equalsIgnoreCase("Добрый день")
-                || message.equalsIgnoreCase("Доброе утро"))
+        log.info(getIsMessageArrays(message, MessageGreeting).toString());
+
+        if (!message.isEmpty()
+                && getIsMessageArrays(message, MessageGreeting)//
         ) {
             String outMsg = String.format("Здравствуйте %1s %2s \uD83D\uDD96\uD83C\uDFFB\uD83D\uDE4F %3s",
                     user.getFirstName(),

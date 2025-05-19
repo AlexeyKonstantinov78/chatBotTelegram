@@ -8,11 +8,16 @@ import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import ru.alekseykonstantinov.interfaceImp.ChatHandler;
 import ru.alekseykonstantinov.telegrambot.MyBotTelegram;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static ru.alekseykonstantinov.utilites.Utilities.getIsMessageArrays;
 import static ru.alekseykonstantinov.utilites.Utilities.toPrettyJson;
 
 @Slf4j
 public class PrivateChat implements ChatHandler {
     private final MyBotTelegram bot;
+    private final List<String> MessageGreeting = Arrays.asList("Привет", "Hello", "Хай", "Салют", "Добрый", "Доброе");
 
     public PrivateChat(MyBotTelegram bot) {
         this.bot = bot;
@@ -31,7 +36,7 @@ public class PrivateChat implements ChatHandler {
             switch (command) {
                 case "/markup" -> bot.sendKeyboardPrivatChat(chatId);
                 case "/hide" -> bot.sendKeyboardHide(chatId);
-                case "/inlineKeyboard" -> bot.sendInlineKeyboard(bot.getChatId(update));
+                case "/inlineKeyboard", "/start" -> bot.sendInlineKeyboard(bot.getChatId(update));
             }
             return;
         }
@@ -59,9 +64,8 @@ public class PrivateChat implements ChatHandler {
             Long chatId = bot.getChatId(update);
             bot.sendMessageGetChatId(chatId, message);
 
-            //отправка изображения по названию
-            if (message.equalsIgnoreCase("привет")
-                    || message.equalsIgnoreCase("hello")) {
+            //отправка изображения по названию при приветствии
+            if (getIsMessageArrays(message, MessageGreeting)) {
                 bot.sendImageUploadingAFileJpg("ulybashka", chatId);
             }
         }
@@ -85,7 +89,7 @@ public class PrivateChat implements ChatHandler {
         }
 
         // отправка инлайн клавиатуру
-        bot.sendInlineKeyboard(bot.getChatId(update));
+        // bot.sendInlineKeyboard(bot.getChatId(update));
     }
 
     /**

@@ -2,8 +2,12 @@ package ru.alekseykonstantinov.utilites;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.User;
 
+import java.util.List;
+
+@Slf4j
 public class Utilities {
 
     /**
@@ -31,4 +35,9 @@ public class Utilities {
         return gson.toJson(update);
     }
 
+    public static Boolean getIsMessageArrays(String message, List<String> list) {
+        List<String> arrMessage = List.of(message.split("\\s+"));
+        log.info(arrMessage.toString());
+        return arrMessage.stream().anyMatch(mess -> list.stream().anyMatch(mess::equalsIgnoreCase));
+    }
 }
