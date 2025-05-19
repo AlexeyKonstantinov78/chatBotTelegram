@@ -13,8 +13,6 @@ import ru.alekseykonstantinov.telegrambot.MyBotTelegram;
 
 import java.util.Comparator;
 
-import static ru.alekseykonstantinov.utilites.Utilities.toPrettyJson;
-
 @Slf4j
 public class BusinessPrivetChat implements ChatHandler {
     private final MyBotTelegram bot;
@@ -77,13 +75,12 @@ public class BusinessPrivetChat implements ChatHandler {
                     .min(Comparator.comparing(PhotoSize::getFileSize))
                     .orElse(null);
 
-            log.info(toPrettyJson(userBot));
-            log.info(toPrettyJson(sendGetUserProfilePhotos));
-            log.info(toPrettyJson(botPhotoSize));
+//            log.info(toPrettyJson(userBot));
+//            log.info(toPrettyJson(sendGetUserProfilePhotos));
+//            log.info(toPrettyJson(botPhotoSize));
         } catch (TelegramApiException e) {
             log.error("Что то не так с получением информации о чат боте: {}", e.getMessage());
         }
-
 
         botPhotoFieldId = bot.getPhotoFieldId(botPhotoSize);
     }
