@@ -88,7 +88,8 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         }
 
         // обработка сообщений полученных от приватного чата
-        if (update.hasMessage() && update.getMessage().getChat().isUserChat()) {
+        if ((update.hasMessage() && update.getMessage().getChat().isUserChat()) ||
+                (update.hasCallbackQuery()) && update.getCallbackQuery().getMessage().getChat().isUserChat()) {
             //new PrivateChat().consumePrivate(update);
             privateChat.handleUpdate(update);
         }
@@ -142,6 +143,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
             log.info("Message: {}", e.getMessage());
         }
 
+        log.info("BusinessConnection: {}", update.hasBusinessConnection());
         try {
             log.info("BusinessMessage isChannelChat: {}", update.getBusinessMessage().getChat().isChannelChat());
             log.info("BusinessMessage isUserChat: {}", update.getBusinessMessage().getChat().isUserChat());
@@ -151,7 +153,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
             log.info("BusinessMessage: {}", e.getMessage());
         }
 
-        log.info("BusinessConnection: {}", update.hasBusinessConnection());
+        log.info("CallbackQuery: {}", update.hasCallbackQuery());
 
         // при удалении участника
         if (update.hasMessage() && update.getMessage().getLeftChatMember() != null) {
@@ -268,6 +270,10 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         if (update.hasBusinessMessage()) {
             return update.getBusinessMessage().getChatId();
         }
+        if (update.hasCallbackQuery()) {
+            return update.getCallbackQuery().getMessage().getChatId();
+        }
+
         return null;
     }
 
@@ -411,7 +417,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      * @param fileId идентификатор фото на серверах telegram
      * @param chatId идентификатор чата
      */
-    public void sendImageFromFileId(String fileId, String chatId) {
+    public void sendImageFromFileId(String fileId, Long chatId) {
         SendPhoto sendPhotoRequest = SendPhoto.builder()
                 .chatId(chatId)
                 .photo(new InputFile(fileId))
@@ -682,20 +688,20 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         // Создаем сообщение с текстом
         SendMessage message = SendMessage.builder()
                 .chatId(chatId)
-                .text("Клавиатура")
+                .text("Управление клавиатурой:")
                 .build();
 
         // Создаем кнопки через билдер
-        InlineKeyboardButton youtubeBtn = InlineKeyboardButton.builder()
+        InlineKeyboardButton markup = InlineKeyboardButton.builder()
                 .text("Показать клавиатуру")
-//                .copyText("/markup")
-                .url("https://youtube.com")
+                .callbackData("/markup")
+                //.url("https://youtube.com")
                 .build();
 
-        InlineKeyboardButton githubBtn = InlineKeyboardButton.builder()
+        InlineKeyboardButton hide = InlineKeyboardButton.builder()
                 .text("Убрать клавиатуру")
                 //.url("https://github.com")
-                .switchInlineQuery("/hide")
+                .callbackData("/hide")
                 .build();
 
         // Создаем ряды кнопок (важно использовать InlineKeyboardRow)
@@ -703,8 +709,8 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
 
         // Создаем первый ряд и добавляем кнопки
         InlineKeyboardRow row1 = new InlineKeyboardRow();
-        row1.add(youtubeBtn);
-        row1.add(githubBtn);
+        row1.add(markup);
+        row1.add(hide);
         keyboard.add(row1);
 
         // Создаем разметку клавиатуры
@@ -735,6 +741,29 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         forceReplyKeyboard.setSelective(false); // Показывать только определенным пользователям
         message.setReplyMarkup(forceReplyKeyboard);
 
+        send(message);
+    }
+
+    /**
+     * Добавляем клавиатуру в приватный чат
+     *
+     * @param chatId ид чата
+     */
+    public void sendKeyboardPrivatChat(Long chatId) {
+        SendMessage message = SendMessage.builder()
+                .chatId(chatId)
+                .text("Клавиатура")
+                .build();
+
+        message.setReplyMarkup(ReplyKeyboardMarkup
+                .builder()
+                .resizeKeyboard(true)
+                .oneTimeKeyboard(true)
+                .keyboardRow(new KeyboardRow("Row 1 Button 1", "Row 1 Button 2", "Row 1 Button 3"))
+                .keyboardRow(new KeyboardRow("Row 1 Button 1", "Row 1 Button 2", "Row 1 Button 3"))
+
+                .build()
+        );
         send(message);
     }
 

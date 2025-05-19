@@ -1,13 +1,10 @@
 package ru.alekseykonstantinov.telegrambot.privatechat;
 
 import lombok.extern.slf4j.Slf4j;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.chat.ChatFullInfo;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import ru.alekseykonstantinov.interfaceImp.ChatHandler;
 import ru.alekseykonstantinov.telegrambot.MyBotTelegram;
 
@@ -23,21 +20,23 @@ public class PrivateChat implements ChatHandler {
 
     @Override
     public void handleUpdate(Update update) {
-        //bot.sendInlineKeyboard(bot.getChatId(update));
 
         // обработка команд в приватном чате
-        if (update.hasMessage()
-                && update.getMessage().hasEntities()
-                && update.getMessage().getEntities().getFirst().getType().equalsIgnoreCase("bot_command")) {
-            String command = update.getMessage().getText();
+        if ((update.hasMessage() && update.getMessage().hasEntities()
+                && update.getMessage().getEntities().getFirst().getType().equalsIgnoreCase("bot_command"))
+                || (update.hasCallbackQuery() && update.getCallbackQuery().getData() != null)
+        ) {
+            String command = update.hasMessage() ? update.getMessage().getText() : update.getCallbackQuery().getData();
             Long chatId = bot.getChatId(update);
             switch (command) {
-                case "/markup" -> sendKeyboard(chatId);
+                case "/markup" -> bot.sendKeyboardPrivatChat(chatId);
                 case "/hide" -> bot.sendKeyboardHide(chatId);
+                case "/inlineKeyboard" -> bot.sendInlineKeyboard(bot.getChatId(update));
             }
             return;
         }
 
+        // сведения при получении сообщений
         if (update.hasMessage()) {
             //bot.sendCustomKeyboard(update.getMessage().getChatId().toString());
             //bot.sendCustomForceReplyKeyboard(update.getMessage().getChatId().toString());
@@ -51,16 +50,7 @@ public class PrivateChat implements ChatHandler {
 //            } catch (TelegramApiException e) {
 //                log.error("Что то не так с отправкой меню: {}", e.getMessage());
 //            }
-            if (update.getMessage().getFrom() != null) {
-                ChatMember chatMember = bot.getChatMember(update);
-                log.info("Информация о member: {}", toPrettyJson(chatMember));
-                log.info("Роль о приватном чате: {}", bot.getMemberRole(chatMember));
-            }
-            if (update.getMessage().getChat() != null) {
-                Long chatId = update.getMessage().getChatId();
-                ChatFullInfo chatFullInfo = bot.getChat(chatId);
-                log.info("Информация о чате: \n{}", toPrettyJson(chatFullInfo));
-            }
+            technicalInfo(update);
         }
 
         if (update.hasMessage() && update.getMessage().hasText()) {
@@ -76,12 +66,14 @@ public class PrivateChat implements ChatHandler {
             }
         }
 
-        if (update.getMessage().hasSticker()) {
+        // при получении стикера возвращает этот стикер
+        if (update.hasMessage() && update.getMessage().hasSticker()) {
             String sticker_file_id = update.getMessage().getSticker().getFileId();
-            System.out.println(sticker_file_id);
+            log.info("Стикер с fileId: {}", sticker_file_id);
             bot.stickerSender(update, sticker_file_id);
         }
 
+        // при получении фото отправляет обратно фото
         if (update.hasMessage() && update.getMessage().hasPhoto()) {
             Long chat_id = update.getMessage().getChatId();
 //            List<PhotoSize> photos = update.getMessage().getPhoto();
@@ -89,33 +81,28 @@ public class PrivateChat implements ChatHandler {
             PhotoSize ps = bot.getPhoto(update);
             String photoFieldIdId = bot.getPhotoFieldId(ps);
             //отправка полученного изображения
-            bot.sendImageFromFileId(photoFieldIdId, chat_id.toString());
-
+            bot.sendImageFromFileId(photoFieldIdId, chat_id);
         }
+
+        // отправка инлайн клавиатуру
+        bot.sendInlineKeyboard(bot.getChatId(update));
     }
 
     /**
-     * Добавляем клавиатуру в приватный чат
+     * Получение информации об участнике роль информация о чате
      *
-     * @param chatId ид чата
+     * @param update
      */
-    private void sendKeyboard(Long chatId) {
-        SendMessage message = SendMessage.builder()
-                .chatId(chatId)
-                .text("Твоя клавиатура")
-                .build();
-
-        message.setReplyMarkup(ReplyKeyboardMarkup
-                .builder()
-                .resizeKeyboard(true)
-                .oneTimeKeyboard(false)
-                .keyboardRow(new KeyboardRow("Row 1 Button 1", "Row 1 Button 2", "Row 1 Button 3"))
-                .keyboardRow(new KeyboardRow("Row 1 Button 1", "Row 1 Button 2", "Row 1 Button 3"))
-
-                .build()
-        );
-        bot.send(message);
+    private void technicalInfo(Update update) {
+        if (update.getMessage().getFrom() != null) {
+            ChatMember chatMember = bot.getChatMember(update);
+            log.info("Информация о member: {}", toPrettyJson(chatMember));
+            log.info("Роль о приватном чате: {}", bot.getMemberRole(chatMember));
+        }
+        if (update.getMessage().getChat() != null) {
+            Long chatId = update.getMessage().getChatId();
+            ChatFullInfo chatFullInfo = bot.getChat(chatId);
+            log.info("Информация о чате: \n{}", toPrettyJson(chatFullInfo));
+        }
     }
-
-
 }
