@@ -12,9 +12,9 @@ import ru.alekseykonstantinov.interfaceImp.ChatHandler;
 import ru.alekseykonstantinov.telegrambot.MyBotTelegram;
 
 import java.util.Comparator;
+import java.util.Optional;
 
-import static ru.alekseykonstantinov.utilites.Utilities.MessageGreeting;
-import static ru.alekseykonstantinov.utilites.Utilities.getIsMessageArrays;
+import static ru.alekseykonstantinov.utilites.Utilities.*;
 
 @Slf4j
 public class BusinessPrivetChat implements ChatHandler {
@@ -26,11 +26,13 @@ public class BusinessPrivetChat implements ChatHandler {
 
     public BusinessPrivetChat(MyBotTelegram bot) {
         this.bot = bot;
-        getBotInfo();
     }
 
     @Override
     public void handleUpdate(Update update) {
+        if (botName == null || botName.isEmpty()) {
+            getBotInfo();
+        }
         log.info("Приватный чат бизнес Bot");
         String message = bot.getChatText(update);
         Long chatId = bot.getChatId(update);
@@ -44,8 +46,8 @@ public class BusinessPrivetChat implements ChatHandler {
                 && getIsMessageArrays(message, MessageGreeting)//
         ) {
             String outMsg = String.format("Здравствуйте %1s %2s \uD83D\uDD96\uD83C\uDFFB\uD83D\uDE4F %3s",
-                    user.getFirstName(),
-                    user.getLastName(),
+                    Optional.ofNullable(user.getFirstName()).orElse(""),
+                    Optional.ofNullable(user.getLastName()).orElse(""),
                     capture
             );
             bot.sendMessageGetChatId(chatId, businessConnectionId, outMsg);
@@ -75,7 +77,7 @@ public class BusinessPrivetChat implements ChatHandler {
                     .min(Comparator.comparing(PhotoSize::getFileSize))
                     .orElse(null);
 
-//            log.info(toPrettyJson(userBot));
+            log.info(toPrettyJson(userBot));
 //            log.info(toPrettyJson(sendGetUserProfilePhotos));
 //            log.info(toPrettyJson(botPhotoSize));
         } catch (TelegramApiException e) {
