@@ -800,7 +800,6 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         commands.add(new BotCommand("/help", "помощь"));
         commands.add(new BotCommand("/settings", "настройки"));
         commands.add(new BotCommand("/info", "информация о боте"));
-
 //        BotCommandScopeDefault scopeDefault = BotCommandScopeDefault.builder().build();
 //        BotCommandScopeChat;
 //        BotCommandScopeAllGroupChats;
@@ -808,16 +807,76 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
 
         SetMyCommands setMyCommands = new SetMyCommands(commands, new BotCommandScopeDefault(), null);
 
-
-        //bot.execute(new SetMyCommands(commands, new BotCommandScopeDefault(), null));
-        //send(setMyCommands);
-
         try {
             // Send the message
             Boolean isCommand = telegramClient.execute(setMyCommands);
             log.info("Menu команд отправлено: {}", isCommand);
         } catch (TelegramApiException e) {
             log.error("Что-то пошло не так с отправкой кнопок menu: {}", e.getMessage());
+        }
+    }
+
+    public void setCommandsScopePrivateChatMenu(Long chatId) {
+        List<BotCommand> commands = new ArrayList<>();
+        commands.add(new BotCommand("/start", "начать работу"));
+        commands.add(new BotCommand("/help", "помощь"));
+        commands.add(new BotCommand("/markup", "Показать клавиатуру"));
+        commands.add(new BotCommand("/hide", "Скрыть клавиатуру"));
+        commands.add(new BotCommand("/info", "информация о боте"));
+        BotCommandScopeChat botCommandScopeChat = BotCommandScopeChat.builder() // видны не только в отправленном чате, но и в группе, где есть бот
+                .chatId(chatId)
+                .build();
+
+        SetMyCommands setMyCommands = new SetMyCommands(commands, botCommandScopeChat, null);
+
+        try {
+            // Send the message
+            Boolean isCommand = telegramClient.execute(setMyCommands);
+            log.info("Menu команд отправлено BotCommandScopeChat: {}", isCommand);
+        } catch (TelegramApiException e) {
+            log.error("Что-то пошло не так с отправкой кнопок BotCommandScopeChat menu: {}", e.getMessage());
+        }
+    }
+
+    public void setCommandsScopeAllPrivateChatsMenu() {
+        List<BotCommand> commands = new ArrayList<>();
+        commands.add(new BotCommand("/start", "начать работу"));
+        commands.add(new BotCommand("/help", "помощь"));
+        commands.add(new BotCommand("/markup", "Показать клавиатуру"));
+        commands.add(new BotCommand("/hide", "Скрыть клавиатуру"));
+        commands.add(new BotCommand("/info", "информация о боте"));
+        BotCommandScopeAllPrivateChats botCommandScopeAllPrivateChats = BotCommandScopeAllPrivateChats.builder() // видны не только в отправленном чате, но и в группе, где есть бот
+                .build();
+
+        SetMyCommands setMyCommands = new SetMyCommands(commands, botCommandScopeAllPrivateChats, null);
+
+        try {
+            // Send the message
+            Boolean isCommand = telegramClient.execute(setMyCommands);
+            log.info("Menu команд setCommandsScopeAllPrivateChatsMenu отправлено: {}", isCommand);
+        } catch (TelegramApiException e) {
+            log.error("Что-то пошло не так с отправкой кнопок setCommandsScopeAllPrivateChatsMenu menu: {}", e.getMessage());
+        }
+    }
+
+    public void setCommandsScopeAllGroupChatsMenu() {
+        List<BotCommand> commands = new ArrayList<>();
+        commands.add(new BotCommand("/start", "начать работу group"));
+        commands.add(new BotCommand("/help", "помощь"));
+        commands.add(new BotCommand("/markup", "Показать клавиатуру"));
+        commands.add(new BotCommand("/hide", "Скрыть клавиатуру"));
+        commands.add(new BotCommand("/info", "информация о боте"));
+        BotCommandScopeAllGroupChats botCommandScopeAllGroupChats = BotCommandScopeAllGroupChats.builder() // видны не только в отправленном чате, но и в группе, где есть бот
+                .build();
+
+        SetMyCommands setMyCommands = new SetMyCommands(commands, botCommandScopeAllGroupChats, null);
+
+        try {
+            // Send the message
+            Boolean isCommand = telegramClient.execute(setMyCommands);
+            log.info("Menu команд setCommandsScopeAllGroupChatsMenu отправлено: {}", isCommand);
+        } catch (TelegramApiException e) {
+            log.error("Что-то пошло не так с отправкой кнопок setCommandsScopeAllGroupChatsMenu menu: {}", e.getMessage());
         }
     }
 
@@ -831,23 +890,10 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         DeleteMyCommands deleteMyCommandsBotCommandScopeAllGroupChats = new DeleteMyCommands();
 
         deleteMyCommandsBotCommandScopeDefault.setScope(new BotCommandScopeDefault());
-        deleteMyCommandsBotCommandScopeChat.setScope(new BotCommandScopeChat("184593928"));
+        //deleteMyCommandsBotCommandScopeChat.setScope(new BotCommandScopeChat(chatId.toString()));
         deleteMyCommandsBotCommandScopeAllPrivateChats.setScope(new BotCommandScopeAllPrivateChats());
         deleteMyCommandsBotCommandScopeAllGroupChats.setScope(new BotCommandScopeAllGroupChats());
 
-        // Пустой список команд
-//        List<BotCommand> commands = new ArrayList<>();
-//        commands.add(new BotCommand("", ""));
-//        SetMyCommands setMyCommands = new SetMyCommands(commands, new BotCommandScopeDefault(), "ru");
-
-//        List<BotCommand> commands = new ArrayList<>();
-//        commands.add(new BotCommand("/start", "начать работу"));
-//
-//        // Используем новый конструктор SetMyCommands
-//        SetMyCommands setMyCommands = SetMyCommands.builder()
-//                .commands(commands)
-//                .scope(new BotCommandScopeDefault())
-//                .build();
         try {
             // Send the message
             telegramClient.execute(deleteMyCommandsBotCommandScopeDefault);
@@ -857,6 +903,23 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
             log.info("Menu clear");
         } catch (TelegramApiException e) {
             log.error("Что-то пошло не так с очисткой кнопок menu: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Удаление всех команд (очистка меню)
+     */
+    public void clearBotCommandsScopeChat(Long chatId) {
+        DeleteMyCommands deleteMyCommandsBotCommandScopeChat = new DeleteMyCommands();
+
+        deleteMyCommandsBotCommandScopeChat.setScope(BotCommandScopeChat.builder().chatId(chatId).build());
+
+        try {
+            // Send the message
+            telegramClient.execute(deleteMyCommandsBotCommandScopeChat);
+            log.info("Menu clear BotCommandScopeChat");
+        } catch (TelegramApiException e) {
+            log.error("Что-то пошло не так с очисткой кнопок menu BotCommandScopeChat: {}", e.getMessage());
         }
     }
 

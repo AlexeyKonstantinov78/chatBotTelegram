@@ -40,7 +40,7 @@ public class Utilities {
 
     public static Boolean getIsMessageArrays(String message, List<String> list) {
         List<String> arrMessage = List.of(message.split("\\s+"));
-        log.info(arrMessage.toString());
+        //log.info(arrMessage.toString());
         return arrMessage.stream().anyMatch(mess -> list.stream().anyMatch(mess::equalsIgnoreCase));
     }
 }

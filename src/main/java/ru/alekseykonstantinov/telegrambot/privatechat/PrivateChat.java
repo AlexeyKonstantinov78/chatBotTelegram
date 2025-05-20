@@ -32,6 +32,7 @@ public class PrivateChat implements ChatHandler {
                 case "/markup" -> bot.sendKeyboardPrivatChat(chatId);
                 case "/hide" -> bot.sendKeyboardHide(chatId);
                 case "/inlineKeyboard", "/start" -> bot.sendInlineKeyboard(bot.getChatId(update));
+                case "/clearMenu" -> bot.clearBotCommandsScopeChat(chatId);
             }
             return;
         }
@@ -52,6 +53,8 @@ public class PrivateChat implements ChatHandler {
 //                log.error("Что то не так с отправкой меню: {}", e.getMessage());
 //            }
             technicalInfo(update);
+            // отправка меню в приватный чат
+            //bot.setCommandsScopePrivateChatMenu(bot.getChatId(update));
         }
 
         if (update.hasMessage() && update.getMessage().hasText()) {

@@ -41,10 +41,9 @@ public class BusinessPrivetChat implements ChatHandler {
         String businessConnectionId = bot.getBusinessConnectionId(update);
         User user = update.getBusinessMessage().getFrom();
 
+        //log.info(getIsMessageArrays(message, MessageGreeting).toString());
 
-        log.info(getIsMessageArrays(message, MessageGreeting).toString());
-
-        if (!message.isEmpty()
+        if (update.hasBusinessMessage() && !message.isEmpty()
                 && getIsMessageArrays(message, MessageGreeting)//
         ) {
             sendGreetings(chatId, businessConnectionId, user);
