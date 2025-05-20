@@ -3,10 +3,12 @@ package ru.alekseykonstantinov.telegrambot.privatechat;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.methods.GetMe;
 import org.telegram.telegrambots.meta.api.methods.GetUserProfilePhotos;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.UserProfilePhotos;
+import org.telegram.telegrambots.meta.api.objects.chat.ChatFullInfo;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.alekseykonstantinov.interfaceImp.ChatHandler;
 import ru.alekseykonstantinov.telegrambot.MyBotTelegram;
@@ -38,24 +40,59 @@ public class BusinessPrivetChat implements ChatHandler {
         Long chatId = bot.getChatId(update);
         String businessConnectionId = bot.getBusinessConnectionId(update);
         User user = update.getBusinessMessage().getFrom();
-        String capture = String.format("@%1s %2s", botUserName, botName);
+
 
         log.info(getIsMessageArrays(message, MessageGreeting).toString());
 
         if (!message.isEmpty()
                 && getIsMessageArrays(message, MessageGreeting)//
         ) {
-            String outMsg = String.format("Здравствуйте %1s %2s \uD83D\uDD96\uD83C\uDFFB\uD83D\uDE4F %3s",
-                    Optional.ofNullable(user.getFirstName()).orElse(""),
-                    Optional.ofNullable(user.getLastName()).orElse(""),
-                    capture
-            );
-            bot.sendMessageGetChatId(chatId, businessConnectionId, outMsg);
-            // bot.sendImageFromFileId(botPhotoFieldId, chatId, String.format("@%1s %2s", botUserName, botName), businessConnectionId);
-
+            sendGreetings(chatId, businessConnectionId, user);
         }
+
+        ChatFullInfo chat = bot.getChat(chatId);
+        log.info(toPrettyJson(chat));
     }
 
+
+    /**
+     * Изменение отправленного сообщения
+     *
+     * @param chatId
+     * @param messageId
+     * @param newText
+     */
+    public void sendEditMessage(Long chatId, Integer messageId, String newText) {
+        EditMessageText editMessageText = EditMessageText
+                .builder()
+                .chatId(chatId)
+                .messageId(messageId)
+                .text(newText)
+                .build();
+        bot.send(editMessageText);
+    }
+
+    /**
+     * Отправка приветствия
+     *
+     * @param chatId               чат ид
+     * @param businessConnectionId ид бизнес чата бота
+     * @param user                 пользователь кто написал
+     */
+    public void sendGreetings(Long chatId, String businessConnectionId, User user) {
+        String capture = String.format("@%1s %2s", botUserName, botName);
+        String outMsg = String.format("Здравствуйте %1s %2s \uD83D\uDD96\uD83C\uDFFB\uD83D\uDE4F %3s",
+                Optional.ofNullable(user.getFirstName()).orElse(""),
+                Optional.ofNullable(user.getLastName()).orElse(""),
+                capture
+        );
+        bot.sendMessageGetChatId(chatId, businessConnectionId, outMsg);
+        // bot.sendImageFromFileId(botPhotoFieldId, chatId, String.format("@%1s %2s", botUserName, botName), businessConnectionId);
+    }
+
+    /**
+     * Получение данных бота
+     */
     private void getBotInfo() {
         GetMe getMe = GetMe.builder().build();
 

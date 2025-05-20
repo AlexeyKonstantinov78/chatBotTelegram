@@ -6,6 +6,7 @@ import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateC
 import org.telegram.telegrambots.meta.api.methods.ActionType;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.botapimethods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.botapimethods.BotApiMethodSerializable;
 import org.telegram.telegrambots.meta.api.methods.commands.DeleteMyCommands;
 import org.telegram.telegrambots.meta.api.methods.commands.GetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
@@ -26,6 +27,7 @@ import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberOwner;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeAllGroupChats;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeAllPrivateChats;
+import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeChat;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ForceReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -63,16 +65,17 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         this.webFrontGroup = new WebFrontGroup(this);
         this.privateChat = new PrivateChat(this);
         this.businessPrivetChat = new BusinessPrivetChat(this);
+        //clearBotCommands();
+        logCurrentCommands();
+        //setCommandsMenu();
     }
 
     @Override
     public void consume(Update update) {
-        clearBotCommands();
-        logCurrentCommands();
         technicalInfo(update);
 
         if (update.hasMessage() && update.getMessage().hasText()) {
-            //ChatActions, такие как «набор текста» или «запись голосового сообщения»
+            //ChatActions, такие, как «набор текста» или «запись голосового сообщения»
             chatActions(update);
             String message = update.getMessage().getText();
             log.info("Получено сообщение: {}", message);
@@ -228,7 +231,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
     }
 
     /**
-     * Отобразить ChatActions, такие как «набор текста» или «запись голосового сообщения»
+     * Отобразить ChatActions, такие, как «набор текста» или «запись голосового сообщения»
      *
      * @param update событие
      */
@@ -314,6 +317,16 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
     }
 
     public <T extends SendPhoto> void send(T method) {
+        try {
+            telegramClient.execute(method);
+            log.info("send: {}", "success");
+        } catch (TelegramApiException e) {
+            // TODO Auto-generated catch block
+            log.error("Что то пошло не так send: {}", e.getMessage());
+        }
+    }
+
+    public <T extends BotApiMethodSerializable> void send(T method) {
         try {
             telegramClient.execute(method);
             log.info("send: {}", "success");
@@ -485,7 +498,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         try {
             return MyBotTelegram.class.getClassLoader().getResource("image/" + name + ".jpg").getPath();
         } catch (NullPointerException e) {
-            log.error("Стаким именем файла скорее всего нет: {}", name);
+            log.error("С таким именем файла скорее всего нет: {}", name);
             return "";
         }
     }
@@ -781,21 +794,28 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      *
      * @throws TelegramApiException api
      */
-    public void setCommandsMenu() throws TelegramApiException {
+    public void setCommandsMenu() {
         List<BotCommand> commands = new ArrayList<>();
         commands.add(new BotCommand("/start", "начать работу"));
         commands.add(new BotCommand("/help", "помощь"));
         commands.add(new BotCommand("/settings", "настройки"));
         commands.add(new BotCommand("/info", "информация о боте"));
-        SetMyCommands setMyCommands = new SetMyCommands(commands, new BotCommandScopeDefault(), "ru");
+
+//        BotCommandScopeDefault scopeDefault = BotCommandScopeDefault.builder().build();
+//        BotCommandScopeChat;
+//        BotCommandScopeAllGroupChats;
+//        BotCommandScopeAllPrivateChats;
+
+        SetMyCommands setMyCommands = new SetMyCommands(commands, new BotCommandScopeDefault(), null);
+
 
         //bot.execute(new SetMyCommands(commands, new BotCommandScopeDefault(), null));
-        send(setMyCommands);
+        //send(setMyCommands);
 
         try {
             // Send the message
-            telegramClient.execute(setMyCommands);
-            log.info("Menu отправлено");
+            Boolean isCommand = telegramClient.execute(setMyCommands);
+            log.info("Menu команд отправлено: {}", isCommand);
         } catch (TelegramApiException e) {
             log.error("Что-то пошло не так с отправкой кнопок menu: {}", e.getMessage());
         }
@@ -806,10 +826,12 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      */
     public void clearBotCommands() {
         DeleteMyCommands deleteMyCommandsBotCommandScopeDefault = new DeleteMyCommands();
+        DeleteMyCommands deleteMyCommandsBotCommandScopeChat = new DeleteMyCommands();
         DeleteMyCommands deleteMyCommandsBotCommandScopeAllPrivateChats = new DeleteMyCommands();
         DeleteMyCommands deleteMyCommandsBotCommandScopeAllGroupChats = new DeleteMyCommands();
 
         deleteMyCommandsBotCommandScopeDefault.setScope(new BotCommandScopeDefault());
+        deleteMyCommandsBotCommandScopeChat.setScope(new BotCommandScopeChat("184593928"));
         deleteMyCommandsBotCommandScopeAllPrivateChats.setScope(new BotCommandScopeAllPrivateChats());
         deleteMyCommandsBotCommandScopeAllGroupChats.setScope(new BotCommandScopeAllGroupChats());
 
@@ -829,6 +851,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         try {
             // Send the message
             telegramClient.execute(deleteMyCommandsBotCommandScopeDefault);
+            telegramClient.execute(deleteMyCommandsBotCommandScopeChat);
             telegramClient.execute(deleteMyCommandsBotCommandScopeAllPrivateChats);
             telegramClient.execute(deleteMyCommandsBotCommandScopeAllGroupChats);
             log.info("Menu clear");
@@ -843,8 +866,17 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
     public void logCurrentCommands() {
         try {
             GetMyCommands getCommands = new GetMyCommands();
+            getCommands.setScope(new BotCommandScopeDefault());
             List<BotCommand> commands = telegramClient.execute(getCommands);
-            log.info("Список команд: {}", toPrettyJson(commands));
+            log.info("Список команд BotCommandScopeDefault: {}", toPrettyJson(commands));
+
+            getCommands.setScope(new BotCommandScopeAllGroupChats());
+            commands = telegramClient.execute(getCommands);
+            log.info("Список команд new BotCommandScopeAllGroupChats(): {}", toPrettyJson(commands));
+
+            getCommands.setScope(new BotCommandScopeAllPrivateChats());
+            commands = telegramClient.execute(getCommands);
+            log.info("Список команд new BotCommandScopeAllPrivateChats(): {}", toPrettyJson(commands));
 
         } catch (TelegramApiException e) {
             log.error("Что-то пошло не так с получением списка команд: {}", e.getMessage());

@@ -42,6 +42,7 @@ public class PrivateChat implements ChatHandler {
             //bot.sendCustomForceReplyKeyboard(update.getMessage().getChatId().toString());
             //bot.sendInlineKeyboard(update.getMessage().getChatId().toString());
             //bot.hideKeyboard(update.getMessage().getChatId().toString());
+            //bot.setCommandsMenu();
 
             //bot.clearBotCommands();
             //bot.logCurrentCommands();
