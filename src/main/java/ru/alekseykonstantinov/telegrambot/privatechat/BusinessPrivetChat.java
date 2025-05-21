@@ -43,11 +43,20 @@ public class BusinessPrivetChat implements ChatHandler {
 
         //log.info(getIsMessageArrays(message, MessageGreeting).toString());
         // приветствие
-        if (update.hasBusinessMessage() && message != null
-                && getIsMessageArrays(message, MessageGreeting)//
-        ) {
-            sendGreetings(chatId, businessConnectionId, user);
+
+        if (update.hasBusinessMessage() && message != null) {
+            if (getIsMessageArraysForms(message, messageGreeting)) {
+                String msgOut = "Здравствуйте!";
+                sendGreetingsOfFarewell(chatId, businessConnectionId, user, msgOut);
+            } else if (getIsMessageArraysForms(message, messageFormsOfFarewell)) {
+                String msgOut = "До свидания!";
+                sendGreetingsOfFarewell(chatId, businessConnectionId, user, msgOut);
+            } else if (getIsMessageArraysForms(message, messageCompliments)) {
+                String msgOut = getRandomExpressionGratitude();
+                sendGreetingsOfFarewell(chatId, businessConnectionId, user, msgOut);
+            }
         }
+
 
         ChatFullInfo chat = bot.getChat(chatId);
         log.info(toPrettyJson(chat));
@@ -78,9 +87,10 @@ public class BusinessPrivetChat implements ChatHandler {
      * @param businessConnectionId ид бизнес чата бота
      * @param user                 пользователь кто написал
      */
-    public void sendGreetings(Long chatId, String businessConnectionId, User user) {
+    public void sendGreetingsOfFarewell(Long chatId, String businessConnectionId, User user, String msgOut) {
         String capture = String.format("@%1s %2s", botUserName, botName);
-        String outMsg = String.format("Здравствуйте %1s %2s \uD83D\uDD96\uD83C\uDFFB\uD83D\uDE4F %3s",
+        String outMsg = String.format("%1s %2s %3s \uD83D\uDD96\uD83C\uDFFB\uD83D\uDE4F %4s",
+                msgOut,
                 Optional.ofNullable(user.getFirstName()).orElse(""),
                 Optional.ofNullable(user.getLastName()).orElse(""),
                 capture

@@ -64,7 +64,7 @@ public class PrivateChat implements ChatHandler {
             bot.sendMessageGetChatId(chatId, message);
 
             //отправка изображения по названию при приветствии
-            if (getIsMessageArrays(message, MessageGreeting)) {
+            if (getIsMessageArrays(message, messageGreeting)) {
                 bot.sendImageUploadingAFileJpg("ulybashka", chatId);
             }
         }
