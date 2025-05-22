@@ -3,12 +3,12 @@ package ru.alekseykonstantinov.telegrambot.privatechat;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.methods.GetMe;
 import org.telegram.telegrambots.meta.api.methods.GetUserProfilePhotos;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.UserProfilePhotos;
 import org.telegram.telegrambots.meta.api.objects.chat.ChatFullInfo;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.alekseykonstantinov.interfaceImp.ChatHandler;
 import ru.alekseykonstantinov.telegrambot.MyBotTelegram;
@@ -46,38 +46,40 @@ public class BusinessPrivetChat implements ChatHandler {
 
         if (update.hasBusinessMessage() && message != null) {
             if (getIsMessageArraysForms(message, messageGreeting)) {
+                Message msg = messageBusinessPrints(chatId, businessConnectionId);
                 String msgOut = "Здравствуйте!";
-                sendGreetingsOfFarewell(chatId, businessConnectionId, user, msgOut);
+                sendGreetingsOfFarewell(msg, user, msgOut);
             } else if (getIsMessageArraysForms(message, messageFormsOfFarewell)) {
+                Message msg = messageBusinessPrints(chatId, businessConnectionId);
                 String msgOut = "До свидания!";
-                sendGreetingsOfFarewell(chatId, businessConnectionId, user, msgOut);
+                sendGreetingsOfFarewell(msg, user, msgOut);
             } else if (getIsMessageArraysForms(message, messageCompliments)) {
+                Message msg = messageBusinessPrints(chatId, businessConnectionId);
                 String msgOut = getRandomExpressionGratitude();
-                sendGreetingsOfFarewell(chatId, businessConnectionId, user, msgOut);
+                sendGreetingsOfFarewell(msg, user, msgOut);
             }
         }
 
 
         ChatFullInfo chat = bot.getChat(chatId);
-        log.info(toPrettyJson(chat));
+        log.info("Чат инфо: {}", toPrettyJson(chat));
     }
 
-
     /**
-     * Изменение отправленного сообщения
+     * Предварительное сообщение
      *
      * @param chatId
-     * @param messageId
-     * @param newText
+     * @return
      */
-    public void sendEditMessage(Long chatId, Integer messageId, String newText) {
-        EditMessageText editMessageText = EditMessageText
-                .builder()
-                .chatId(chatId)
-                .messageId(messageId)
-                .text(newText)
-                .build();
-        bot.send(editMessageText);
+    private Message messageBusinessPrints(Long chatId, String businessConnectionId) {
+        String mess = "Печатает...";
+        Message message = bot.sendMessageGetChatId(chatId, businessConnectionId, String.valueOf(mess));
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            log.error("что-то не так");
+        }
+        return message;
     }
 
     /**
@@ -97,6 +99,18 @@ public class BusinessPrivetChat implements ChatHandler {
         );
         bot.sendMessageGetChatId(chatId, businessConnectionId, outMsg);
         // bot.sendImageFromFileId(botPhotoFieldId, chatId, String.format("@%1s %2s", botUserName, botName), businessConnectionId);
+    }
+
+    public void sendGreetingsOfFarewell(Message message, User user, String msgOut) {
+        String capture = String.format("@%1s %2s", botUserName, botName);
+        String outMsg = String.format("%1s %2s %3s \uD83D\uDD96\uD83C\uDFFB\uD83D\uDE4F %4s",
+                msgOut,
+                Optional.ofNullable(user.getFirstName()).orElse(""),
+                Optional.ofNullable(user.getLastName()).orElse(""),
+                capture
+        );
+
+        bot.sendEditMessageBusinessChatId(message, outMsg);
     }
 
     /**

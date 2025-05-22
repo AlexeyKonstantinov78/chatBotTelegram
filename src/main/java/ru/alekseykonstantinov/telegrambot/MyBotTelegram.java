@@ -6,7 +6,6 @@ import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateC
 import org.telegram.telegrambots.meta.api.methods.ActionType;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.botapimethods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.botapimethods.BotApiMethodSerializable;
 import org.telegram.telegrambots.meta.api.methods.commands.DeleteMyCommands;
 import org.telegram.telegrambots.meta.api.methods.commands.GetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
@@ -18,6 +17,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.send.SendSticker;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.chat.Chat;
 import org.telegram.telegrambots.meta.api.objects.chat.ChatFullInfo;
@@ -29,6 +29,7 @@ import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScope
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeAllPrivateChats;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeChat;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ForceReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -43,6 +44,8 @@ import ru.alekseykonstantinov.telegrambot.group.WebFrontGroup;
 import ru.alekseykonstantinov.telegrambot.privatechat.BusinessPrivetChat;
 import ru.alekseykonstantinov.telegrambot.privatechat.PrivateChat;
 
+import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -203,14 +206,13 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      * @param chatId чат ид
      * @param msg    сообщение
      */
-    public void sendMessageGetChatId(Long chatId, String msg) {
-        //SendMessage sendMessage = new SendMessage(chatId.toString(), msg);
-
+    public Message sendMessageGetChatId(Long chatId, String msg) {
         SendMessage sendMessage = SendMessage.builder()
                 .chatId(chatId)
-                .text(msg)
+                .text(new String(msg.getBytes(), StandardCharsets.UTF_8))
+                .parseMode("markdown")
                 .build();
-        send(sendMessage);
+        return send(sendMessage);
     }
 
     /**
@@ -219,15 +221,50 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
      * @param chatId чат ид
      * @param msg    сообщение
      */
-    public void sendMessageGetChatId(Long chatId, String businessConnectionId, String msg) {
+    public Message sendMessageGetChatId(Long chatId, String businessConnectionId, String msg) {
         //SendMessage sendMessage = new SendMessage(chatId.toString(), msg);
 
         SendMessage sendMessage = SendMessage.builder()
                 .chatId(chatId)
                 .businessConnectionId(businessConnectionId)
-                .text(msg)
+                .text(new String(msg.getBytes(), StandardCharsets.UTF_8))
                 .build();
-        send(sendMessage);
+        return send(sendMessage);
+    }
+
+    /**
+     * Изменение отправленного сообщения для приват чата
+     *
+     * @param message старое сообщение
+     * @param newText новое
+     * @param newText
+     */
+    public Message sendEditMessageChatId(Message message, String newText) {
+        EditMessageText editMessageText = EditMessageText
+                .builder()
+                .chatId(message.getChatId())
+                .messageId(message.getMessageId())
+                .text(newText)
+                .build();
+        return (Message) send(editMessageText);
+    }
+
+    /**
+     * Изменение отправленного сообщения для приват чата
+     *
+     * @param message старое сообщение
+     * @param newText новое
+     * @param newText
+     */
+    public Message sendEditMessageBusinessChatId(Message message, String newText) {
+        EditMessageText editMessageText = EditMessageText
+                .builder()
+                .chatId(message.getChatId())
+                .businessConnectionId(message.getBusinessConnectionId())
+                .messageId(message.getMessageId())
+                .text(newText)
+                .build();
+        return (Message) send(editMessageText);
     }
 
     /**
@@ -300,42 +337,37 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         return update.getBusinessMessage().getBusinessConnectionId();
     }
 
+    /*start send_______________________________________________________________________*/
+
     /**
      * Отправка боту в зависимости от метода и чата
      *
      * @param method ограничены методами BotApiMethod
      * @param
      */
-    public <T extends BotApiMethod> void send(T method) {
+    public <T extends Serializable, Method extends BotApiMethod<T>> T send(Method method) {
         try {
-            telegramClient.execute(method);
+            T send = telegramClient.execute(method);
             log.info("send: {}", "success");
+            return send;
         } catch (TelegramApiException e) {
             // TODO Auto-generated catch block
             log.error("Что то пошло не так send: {}", e.getMessage());
+            return null;
         }
     }
 
-    public <T extends SendPhoto> void send(T method) {
+    private Message send(SendPhoto message) {
         try {
-            telegramClient.execute(method);
-            log.info("send: {}", "success");
+            Message msg = telegramClient.execute(message);
+            log.info("send SendPhoto: {}", "success");
+            return msg;
         } catch (TelegramApiException e) {
-            // TODO Auto-generated catch block
-            log.error("Что то пошло не так send: {}", e.getMessage());
+            log.error("Что то пошло не так SendPhoto: {}", e.getMessage());
+            return null;
         }
     }
-
-    public <T extends BotApiMethodSerializable> void send(T method) {
-        try {
-            telegramClient.execute(method);
-            log.info("send: {}", "success");
-        } catch (TelegramApiException e) {
-            // TODO Auto-generated catch block
-            log.error("Что то пошло не так send: {}", e.getMessage());
-        }
-    }
-
+    /*end send_________________________________________________________________________________*/
 
     /**
      * Извлечет PhotoSize из фотографии,

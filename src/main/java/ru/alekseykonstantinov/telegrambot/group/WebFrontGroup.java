@@ -4,13 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.chat.ChatFullInfo;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
 import ru.alekseykonstantinov.interfaceImp.ChatHandler;
 import ru.alekseykonstantinov.telegrambot.MyBotTelegram;
 
 import java.util.List;
 
 import static ru.alekseykonstantinov.config.Config.TELEGRAM_BOT_GROUP_FRONT_NAME;
-import static ru.alekseykonstantinov.utilites.Utilities.toPrettyJson;
+import static ru.alekseykonstantinov.utilites.Utilities.*;
 
 @Slf4j
 public class WebFrontGroup implements ChatHandler {
@@ -56,14 +57,44 @@ public class WebFrontGroup implements ChatHandler {
             String message = update.getMessage().getText();
             log.info("Получено сообщение в группе: {}{}{}", TELEGRAM_BOT_GROUP_FRONT_NAME, " message:  ", message);
             Long chatId = bot.getChatId(update);
-            bot.sendMessageGetChatId(chatId, message);
 
-            //отправка изображения по названию
-            if (message.equalsIgnoreCase("привет")
-                    || message.equalsIgnoreCase("hello")) {
+            //проверка на приветствие из списка отправка изображения по названию
+            if (getIsMessageArraysForms(message, messageGreeting)) {
+                Message msg = messagePrints(chatId);
                 bot.sendImageUploadingAFileJpg("ulybashka", chatId);
+                String msgOut = "Здравствуйте!";
+                bot.sendEditMessageChatId(msg, String.valueOf(msgOut));
+                return;
+            } else if (getIsMessageArraysForms(message, messageFormsOfFarewell)) {
+                Message msg = messagePrints(chatId);
+                String msgOut = "До свидания!";
+                bot.sendEditMessageChatId(msg, String.valueOf(msgOut));
+                return;
+            } else if (getIsMessageArraysForms(message, messageCompliments)) {
+                Message msg = messagePrints(chatId);
+                String msgOut = getRandomExpressionGratitude();
+                bot.sendEditMessageChatId(msg, String.valueOf(msgOut));
+                return;
             }
+
+            bot.sendMessageGetChatId(chatId, String.valueOf(message));
         }
     }
 
+    /**
+     * Предварительное сообщение
+     *
+     * @param chatId
+     * @return
+     */
+    private Message messagePrints(Long chatId) {
+        String mess = "Печатает...";
+        Message message = bot.sendMessageGetChatId(chatId, String.valueOf(mess));
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            log.error("что-то не так");
+        }
+        return message;
+    }
 }

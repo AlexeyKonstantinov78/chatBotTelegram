@@ -101,6 +101,13 @@ public class Utilities {
         return arrMessage.stream().anyMatch(mess -> list.stream().anyMatch(mess::equalsIgnoreCase));
     }
 
+    /**
+     * Проверяет частичное совпадение с массивом первое вхождение возвращает true
+     *
+     * @param message сообщение
+     * @param list    список слов
+     * @return Boolean
+     */
     public static Boolean getIsMessageArraysForms(String message, List<String> list) {
         return list.stream()
                 .anyMatch(word -> message.toLowerCase().contains(word.toLowerCase()));

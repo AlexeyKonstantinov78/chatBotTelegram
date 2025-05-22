@@ -5,6 +5,7 @@ import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.chat.ChatFullInfo;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
 import ru.alekseykonstantinov.interfaceImp.ChatHandler;
 import ru.alekseykonstantinov.telegrambot.MyBotTelegram;
 
@@ -61,11 +62,24 @@ public class PrivateChat implements ChatHandler {
             String message = update.getMessage().getText();
             log.info("Получено сообщение в приватном чате: {}{}", " message:  ", message);
             Long chatId = bot.getChatId(update);
-            bot.sendMessageGetChatId(chatId, message);
 
-            //отправка изображения по названию при приветствии
-            if (getIsMessageArrays(message, messageGreeting)) {
+//            Message editMessage = bot.sendEditMessageChatId(msg, String.valueOf(message));
+//            log.info("Результат изменения: {}", toPrettyJson(editMessage));
+
+            //отправка изображения по приветствию
+            if (getIsMessageArraysForms(message, messageGreeting)) {
+                Message msg = messagePrints(chatId);
+                String msgOut = "Здравствуйте!";
+                bot.sendEditMessageChatId(msg, String.valueOf(msgOut));
                 bot.sendImageUploadingAFileJpg("ulybashka", chatId);
+            } else if (getIsMessageArraysForms(message, messageFormsOfFarewell)) {
+                Message msg = messagePrints(chatId);
+                String msgOut = "До свидания!";
+                bot.sendEditMessageChatId(msg, String.valueOf(msgOut));
+            } else if (getIsMessageArraysForms(message, messageCompliments)) {
+                Message msg = messagePrints(chatId);
+                String msgOut = getRandomExpressionGratitude();
+                bot.sendEditMessageChatId(msg, String.valueOf(msgOut));
             }
         }
 
@@ -89,6 +103,23 @@ public class PrivateChat implements ChatHandler {
 
         // отправка инлайн клавиатуру
         // bot.sendInlineKeyboard(bot.getChatId(update));
+    }
+
+    /**
+     * Предварительное сообщение
+     *
+     * @param chatId
+     * @return
+     */
+    private Message messagePrints(Long chatId) {
+        String mess = "Печатает...";
+        Message message = bot.sendMessageGetChatId(chatId, String.valueOf(mess));
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            log.error("что-то не так");
+        }
+        return message;
     }
 
     /**
