@@ -89,9 +89,9 @@ public class BusinessPrivetChat implements ChatHandler {
      * @param businessConnectionId ид бизнес чата бота
      * @param user                 пользователь кто написал
      */
-    public void sendGreetingsOfFarewell(Long chatId, String businessConnectionId, User user, String msgOut) {
+    private void sendGreetingsOfFarewell(Long chatId, String businessConnectionId, User user, String msgOut) {
         String capture = String.format("@%1s %2s", botUserName, botName);
-        String outMsg = String.format("%1s %2s %3s \uD83D\uDD96\uD83C\uDFFB\uD83D\uDE4F %4s",
+        String outMsg = String.format("%1s \uD83D\uDD96\uD83C\uDFFB\uD83D\uDE4F %2s %3s %4s",
                 msgOut,
                 Optional.ofNullable(user.getFirstName()).orElse(""),
                 Optional.ofNullable(user.getLastName()).orElse(""),
@@ -101,12 +101,11 @@ public class BusinessPrivetChat implements ChatHandler {
         // bot.sendImageFromFileId(botPhotoFieldId, chatId, String.format("@%1s %2s", botUserName, botName), businessConnectionId);
     }
 
-    public void sendGreetingsOfFarewell(Message message, User user, String msgOut) {
+    private void sendGreetingsOfFarewell(Message message, User user, String msgOut) {
         String capture = String.format("@%1s %2s", botUserName, botName);
-        String outMsg = String.format("%1s %2s %3s \uD83D\uDD96\uD83C\uDFFB\uD83D\uDE4F %4s",
+        String outMsg = String.format("%1s \uD83D\uDD96\uD83C\uDFFB\uD83D\uDE4F %2s %3s",
                 msgOut,
-                Optional.ofNullable(user.getFirstName()).orElse(""),
-                Optional.ofNullable(user.getLastName()).orElse(""),
+                bot.getInfoUserChat(user),
                 capture
         );
 

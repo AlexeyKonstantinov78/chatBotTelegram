@@ -46,10 +46,7 @@ import ru.alekseykonstantinov.telegrambot.privatechat.PrivateChat;
 
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static ru.alekseykonstantinov.utilites.Utilities.getUserData;
 import static ru.alekseykonstantinov.utilites.Utilities.toPrettyJson;
@@ -132,6 +129,13 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         }
     }
 
+    public String getInfoUserChat(User user) {
+        return String.format("%1s %2s",
+                Optional.ofNullable(user.getFirstName()).orElse(""),
+                Optional.ofNullable(user.getLastName()).orElse("")
+        );
+    }
+
     /**
      *
      */
@@ -185,9 +189,10 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
                 : "";
 
         String message = String.format(
-                "@%1s Привет %2s. Добро пожаловать %3s",
-                user.getUserName(),
-                user.getFirstName(),
+                "@%1s Привет %2s %3s. Добро пожаловать %4s",
+                Optional.ofNullable(user.getUserName()).orElse(""),
+                Optional.ofNullable(user.getFirstName()).orElse(""),
+                Optional.ofNullable(user.getLastName()).orElse(""),
                 msgGroup
         );
 
@@ -210,7 +215,6 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         SendMessage sendMessage = SendMessage.builder()
                 .chatId(chatId)
                 .text(new String(msg.getBytes(), StandardCharsets.UTF_8))
-                .parseMode("markdown")
                 .build();
         return send(sendMessage);
     }

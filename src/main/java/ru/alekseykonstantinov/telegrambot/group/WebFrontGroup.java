@@ -2,6 +2,7 @@ package ru.alekseykonstantinov.telegrambot.group;
 
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.chat.ChatFullInfo;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
@@ -57,22 +58,23 @@ public class WebFrontGroup implements ChatHandler {
             String message = update.getMessage().getText();
             log.info("Получено сообщение в группе: {}{}{}", TELEGRAM_BOT_GROUP_FRONT_NAME, " message:  ", message);
             Long chatId = bot.getChatId(update);
+            User user = update.getMessage().getFrom();
 
             //проверка на приветствие из списка отправка изображения по названию
             if (getIsMessageArraysForms(message, messageGreeting)) {
                 Message msg = messagePrints(chatId);
                 bot.sendImageUploadingAFileJpg("ulybashka", chatId);
-                String msgOut = "Здравствуйте!";
+                String msgOut = String.format("Здравствуйте! %1s", bot.getInfoUserChat(user));
                 bot.sendEditMessageChatId(msg, String.valueOf(msgOut));
                 return;
             } else if (getIsMessageArraysForms(message, messageFormsOfFarewell)) {
                 Message msg = messagePrints(chatId);
-                String msgOut = "До свидания!";
+                String msgOut = String.format("До свидания! %1s", bot.getInfoUserChat(user));
                 bot.sendEditMessageChatId(msg, String.valueOf(msgOut));
                 return;
             } else if (getIsMessageArraysForms(message, messageCompliments)) {
                 Message msg = messagePrints(chatId);
-                String msgOut = getRandomExpressionGratitude();
+                String msgOut = String.format("%1s %2s", getRandomExpressionGratitude(), bot.getInfoUserChat(user));
                 bot.sendEditMessageChatId(msg, String.valueOf(msgOut));
                 return;
             }
