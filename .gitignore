@@ -39,3 +39,4 @@ build/
 /src/main/resources/config.properties
 ###log###
 /logs
+/src/main/resources/auth/

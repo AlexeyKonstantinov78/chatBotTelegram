@@ -107,6 +107,25 @@
         <!--            <version>6.9.7.1</version>-->
         <!--        </dependency>-->
 
+        <!-- https://mvnrepository.com/artifact/com.github.plexpt/chatgpt -->
+        <dependency>
+            <groupId>com.github.plexpt</groupId>
+            <artifactId>chatgpt</artifactId>
+            <version>5.1.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-dialogflow</artifactId>
+            <version>4.57.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.auth</groupId>
+            <artifactId>google-auth-library-oauth2-http</artifactId>
+            <version>1.27.0</version>
+        </dependency>
+
     </dependencies>
+
 
 </project>

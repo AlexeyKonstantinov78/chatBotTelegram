@@ -65,6 +65,7 @@ public class PrivateChat implements ChatHandler {
             Long chatId = bot.getChatId(update);
             User user = update.getMessage().getFrom();
 
+
 //            Message editMessage = bot.sendEditMessageChatId(msg, String.valueOf(message));
 //            log.info("Результат изменения: {}", toPrettyJson(editMessage));
 
@@ -74,15 +75,21 @@ public class PrivateChat implements ChatHandler {
                 String msgOut = String.format("Здравствуйте! %1s", bot.getInfoUserChat(user));
                 bot.sendEditMessageChatId(msg, String.valueOf(msgOut));
                 bot.sendImageUploadingAFileJpg("ulybashka", chatId);
+                return;
             } else if (getIsMessageArraysForms(message, messageFormsOfFarewell)) {
                 Message msg = messagePrints(chatId);
                 String msgOut = String.format("До свидания! %1s", bot.getInfoUserChat(user));
                 bot.sendEditMessageChatId(msg, String.valueOf(msgOut));
+                return;
             } else if (getIsMessageArraysForms(message, messageCompliments)) {
                 Message msg = messagePrints(chatId);
                 String msgOut = String.format("%1s %2s", getRandomExpressionGratitude(), bot.getInfoUserChat(user));
                 bot.sendEditMessageChatId(msg, String.valueOf(msgOut));
+                return;
             }
+
+            // appealGPTChat(chatId, message);
+            appealDialogflow(chatId, message);
         }
 
         // при получении стикера возвращает этот стикер
@@ -105,6 +112,39 @@ public class PrivateChat implements ChatHandler {
 
         // отправка инлайн клавиатуру
         // bot.sendInlineKeyboard(bot.getChatId(update));
+    }
+
+    /**
+     * Отправка запросов в Dialogflow
+     */
+    private void appealDialogflow(Long chatId, String message) {
+        Message msg = messagePrints(chatId);
+        String sessionId = "tg-" + chatId;
+        try {
+            String responseDialogFlow = bot.getDialogflow().detectIntent(sessionId, message, "ru-RU");
+            bot.sendEditMessageChatId(msg, String.valueOf(responseDialogFlow));
+        } catch (Exception e) {
+            log.error("Что-то не так Dialogflow: {}", e.getMessage());
+            bot.sendEditMessageChatId(msg, String.valueOf("Что-то не так"));
+        }
+    }
+
+    /**
+     * Отправка запросов GPT chat
+     *
+     * @param chatId
+     * @param message
+     */
+    private void appealGPTChat(Long chatId, String message) {
+        String prompt = "Вести разговор от имени Alex AI Bot. Чат бот. на разные тематики";
+        Message msg = messagePrints(chatId);
+        try {
+            String responseGpt = bot.getChatGPT().sendMessage(prompt, message);
+            bot.sendEditMessageChatId(msg, String.valueOf(responseGpt));
+        } catch (Exception e) {
+            log.info("Что-то не так с chatGPT: {}", e.getMessage());
+            bot.sendEditMessageChatId(msg, String.valueOf("Что-то не так"));
+        }
     }
 
     /**
