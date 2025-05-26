@@ -40,7 +40,8 @@ public class YandexGPTService {
             requestBody.put("modelUri", "gpt://" + folderId + "/" + YandexGPTtype.YANDEX_LITE.getName());
             requestBody.put("completionOptions", Map.of(
                     "temperature", 0.3,
-                    "maxTokens", 500
+                    "maxTokens", 500,
+                    "reasoningOptions.mode", "ENABLED_HIDDEN"
             ));
 
             Map<String, String> system = new HashMap<>();
