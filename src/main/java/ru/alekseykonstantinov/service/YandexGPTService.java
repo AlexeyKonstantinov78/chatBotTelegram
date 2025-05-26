@@ -37,7 +37,7 @@ public class YandexGPTService {
             // Создание тела запроса
             Map<String, Object> requestBody = new HashMap<>();
             ;
-            requestBody.put("modelUri", "gpt://" + folderId + "/" + YandexGPTtype.YANDEX_RC.getName());
+            requestBody.put("modelUri", "gpt://" + folderId + "/" + YandexGPTtype.YANDEX_LITE.getName());
             requestBody.put("completionOptions", Map.of(
                     "temperature", 0.3,
                     "maxTokens", 500
@@ -45,7 +45,7 @@ public class YandexGPTService {
 
             Map<String, String> system = new HashMap<>();
             system.put("role", "system");
-            system.put("text", "Вести разговор от имени Alex AI Bot. Чат бот на разные тематики");
+            system.put("text", "Вести разговор от имени Alex AI Bot");
 
             Map<String, String> message = new HashMap<>();
             message.put("role", "user");
@@ -55,7 +55,7 @@ public class YandexGPTService {
             String requestBodyJson = objectMapper.writeValueAsString(requestBody);
             request.setEntity(new StringEntity(requestBodyJson));
 
-            log.info(request.toString());
+            log.info(requestBodyJson);
 
             // Выполнение запроса
             HttpResponse response = httpClient.execute(request);
