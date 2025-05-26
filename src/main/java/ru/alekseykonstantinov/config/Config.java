@@ -16,6 +16,8 @@ public class Config {
     public static String OPENAI_API_KEY;
     public static String DIALOGFLOW_KEY;
     public static String GOOGLE_CLOUD_PROJECT_ID;
+    public static String IAM_TOKEN;
+    public static String FOLDER_ID;
 
 
     static {
@@ -30,6 +32,8 @@ public class Config {
             OPENAI_API_KEY = props.getProperty("openai.api.key");
             DIALOGFLOW_KEY = props.getProperty("google.cloud.console");
             GOOGLE_CLOUD_PROJECT_ID = props.getProperty("google.cloud.projectId");
+            IAM_TOKEN = props.getProperty("yandex.cloud.apiKey");
+            FOLDER_ID = props.getProperty("yandex.cloud.folderId");
 
         } catch (IOException e) {
             log.error("Ошибка загрузки config.properties IOException: {}", e.getMessage());

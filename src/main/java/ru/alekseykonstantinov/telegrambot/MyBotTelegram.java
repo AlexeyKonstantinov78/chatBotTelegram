@@ -42,6 +42,7 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 import ru.alekseykonstantinov.interfaceImp.ChatHandler;
 import ru.alekseykonstantinov.service.ChatGptService;
 import ru.alekseykonstantinov.service.DialogflowConnector;
+import ru.alekseykonstantinov.service.YandexGPTService;
 import ru.alekseykonstantinov.telegrambot.group.WebFrontGroup;
 import ru.alekseykonstantinov.telegrambot.privatechat.BusinessPrivetChat;
 import ru.alekseykonstantinov.telegrambot.privatechat.PrivateChat;
@@ -51,8 +52,7 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static ru.alekseykonstantinov.config.Config.GOOGLE_CLOUD_PROJECT_ID;
-import static ru.alekseykonstantinov.config.Config.OPENAI_API_KEY;
+import static ru.alekseykonstantinov.config.Config.*;
 import static ru.alekseykonstantinov.utilites.Utilities.getUserData;
 import static ru.alekseykonstantinov.utilites.Utilities.toPrettyJson;
 
@@ -65,6 +65,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
     private final ChatHandler businessPrivetChat;
     private ChatGptService chatGPT;
     private final DialogflowConnector dialogflow;
+    private final YandexGPTService yandexGPTClient;
 
     public MyBotTelegram(String TOKEN) throws IOException {
         telegramClient = new OkHttpTelegramClient(TOKEN);
@@ -77,6 +78,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
                 GOOGLE_CLOUD_PROJECT_ID,
                 getPathJSONToken("small-talk-nnig-b028908750db")
         );
+        this.yandexGPTClient = new YandexGPTService(IAM_TOKEN, FOLDER_ID);
         //clearBotCommands();
         logCurrentCommands();
         //setCommandsMenu();
@@ -139,6 +141,10 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
 
             sendMessageNewUser(chat, user);
         }
+    }
+
+    public YandexGPTService getYandexGPTClient() {
+        return yandexGPTClient;
     }
 
     public DialogflowConnector getDialogflow() {

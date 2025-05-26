@@ -89,7 +89,9 @@ public class PrivateChat implements ChatHandler {
             }
 
             // appealGPTChat(chatId, message);
-            appealDialogflow(chatId, message);
+            // appealDialogflow(chatId, message);
+            appealYandexGPT(chatId, message);
+
         }
 
         // при получении стикера возвращает этот стикер
@@ -125,6 +127,21 @@ public class PrivateChat implements ChatHandler {
             bot.sendEditMessageChatId(msg, String.valueOf(responseDialogFlow));
         } catch (Exception e) {
             log.error("Что-то не так Dialogflow: {}", e.getMessage());
+            bot.sendEditMessageChatId(msg, String.valueOf("Что-то не так"));
+        }
+    }
+
+    /**
+     * Отправка запросов в Dialogflow
+     */
+    private void appealYandexGPT(Long chatId, String message) {
+        Message msg = messagePrints(chatId);
+
+        try {
+            String responseYandexGPT = bot.getYandexGPTClient().generateText(message);
+            bot.sendEditMessageChatId(msg, String.valueOf(responseYandexGPT));
+        } catch (Exception e) {
+            log.error("Что-то не так YandexGPT: {}", e.getMessage());
             bot.sendEditMessageChatId(msg, String.valueOf("Что-то не так"));
         }
     }
