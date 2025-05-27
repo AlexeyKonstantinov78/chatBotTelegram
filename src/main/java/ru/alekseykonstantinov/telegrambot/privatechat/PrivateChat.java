@@ -1,5 +1,6 @@
 package ru.alekseykonstantinov.telegrambot.privatechat;
 
+import com.vdurmont.emoji.EmojiParser;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -131,11 +132,11 @@ public class PrivateChat implements ChatHandler {
             String responseDialogFlow = bot.getDialogflow().detectIntent(sessionId, message, "ru-RU");
             Message messageOut = bot.sendEditMessageChatId(msg, String.valueOf(responseDialogFlow));
             if (messageOut == null) {
-                bot.sendEditMessageChatId(msg, String.valueOf("Что - то не так"));
+                bot.sendEditMessageChatId(msg, EmojiParser.parseToUnicode("Что-то не так :scream:"));
             }
         } catch (Exception e) {
             log.error("Что-то не так Dialogflow: {}", e.getMessage());
-            bot.sendEditMessageChatId(msg, String.valueOf("Что-то не так"));
+            bot.sendEditMessageChatId(msg, EmojiParser.parseToUnicode("Что-то не так :scream:"));
         }
     }
 
