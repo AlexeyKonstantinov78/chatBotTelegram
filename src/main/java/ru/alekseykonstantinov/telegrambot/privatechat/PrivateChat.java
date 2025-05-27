@@ -129,7 +129,10 @@ public class PrivateChat implements ChatHandler {
         String sessionId = "tg-" + chatId;
         try {
             String responseDialogFlow = bot.getDialogflow().detectIntent(sessionId, message, "ru-RU");
-            bot.sendEditMessageChatId(msg, String.valueOf(responseDialogFlow));
+            Message messageOut = bot.sendEditMessageChatId(msg, String.valueOf(responseDialogFlow));
+            if (messageOut == null) {
+                bot.sendEditMessageChatId(msg, String.valueOf("Что - то не так"));
+            }
         } catch (Exception e) {
             log.error("Что-то не так Dialogflow: {}", e.getMessage());
             bot.sendEditMessageChatId(msg, String.valueOf("Что-то не так"));

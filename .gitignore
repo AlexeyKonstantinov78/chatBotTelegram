@@ -40,3 +40,5 @@ build/
 ###log###
 /logs
 /src/main/resources/auth/
+/out/
+/src/main/resources/META-INF/
