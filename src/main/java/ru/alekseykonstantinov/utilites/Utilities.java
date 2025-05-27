@@ -66,6 +66,9 @@ public class Utilities {
             "Пожалуйста"
     );
 
+    public static final List<String> listTranslit =
+            Arrays.asList("перевод", "перевести", "переведи");
+
     public static String getRandomExpressionGratitude() {
         return expressionGratitude.get(ThreadLocalRandom.current().nextInt(0, expressionGratitude.size()));
     }

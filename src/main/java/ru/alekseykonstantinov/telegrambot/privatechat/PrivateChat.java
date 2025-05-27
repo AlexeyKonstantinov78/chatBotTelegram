@@ -88,9 +88,14 @@ public class PrivateChat implements ChatHandler {
                 return;
             }
 
+            if (getIsMessageArraysForms(message, listTranslit)) {
+                appealDialogflowTranslit(chatId, message);
+                return;
+            }
+
             // appealGPTChat(chatId, message);
-            // appealDialogflow(chatId, message);
-            appealYandexGPT(chatId, message);
+            appealDialogflow(chatId, message);
+            //appealYandexGPT(chatId, message);
 
         }
 
@@ -127,6 +132,21 @@ public class PrivateChat implements ChatHandler {
             bot.sendEditMessageChatId(msg, String.valueOf(responseDialogFlow));
         } catch (Exception e) {
             log.error("Что-то не так Dialogflow: {}", e.getMessage());
+            bot.sendEditMessageChatId(msg, String.valueOf("Что-то не так"));
+        }
+    }
+
+    /**
+     * Отправка запросов в Dialogflow
+     */
+    private void appealDialogflowTranslit(Long chatId, String message) {
+        Message msg = messagePrints(chatId);
+        String sessionId = "tg-" + chatId;
+        try {
+            String responseDialogFlow = bot.getDialogflowTranslit().detectIntent(sessionId, message, "ru-RU");
+            bot.sendEditMessageChatId(msg, String.valueOf(responseDialogFlow));
+        } catch (Exception e) {
+            log.error("Что-то не так DialogflowTranslit: {}", e.getMessage());
             bot.sendEditMessageChatId(msg, String.valueOf("Что-то не так"));
         }
     }

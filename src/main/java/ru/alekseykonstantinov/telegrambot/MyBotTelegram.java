@@ -65,6 +65,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
     private final ChatHandler businessPrivetChat;
     private ChatGptService chatGPT;
     private final DialogflowConnector dialogflow;
+    private final DialogflowConnector dialogflowTranslit;
     private final YandexGPTService yandexGPTClient;
 
     public MyBotTelegram(String TOKEN) throws IOException {
@@ -77,6 +78,10 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
         this.dialogflow = new DialogflowConnector(
                 GOOGLE_CLOUD_PROJECT_ID,
                 getPathJSONToken("small-talk-nnig-b028908750db")
+        );
+        this.dialogflowTranslit = new DialogflowConnector(
+                GOOGLE_CLOUD_TRANSLIT_PROJECT_ID,
+                getPathJSONToken("translate-pbis-1573793e18a6")
         );
         this.yandexGPTClient = new YandexGPTService(IAM_TOKEN, FOLDER_ID);
         //clearBotCommands();
@@ -145,6 +150,10 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
 
     public YandexGPTService getYandexGPTClient() {
         return yandexGPTClient;
+    }
+
+    public DialogflowConnector getDialogflowTranslit() {
+        return dialogflowTranslit;
     }
 
     public DialogflowConnector getDialogflow() {
