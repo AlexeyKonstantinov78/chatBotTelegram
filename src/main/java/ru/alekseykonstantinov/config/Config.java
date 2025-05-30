@@ -19,7 +19,9 @@ public class Config {
     public static String GOOGLE_CLOUD_TRANSLIT_PROJECT_ID;
     public static String IAM_TOKEN;
     public static String FOLDER_ID;
-
+    public static String GIGA_CHAT_KEY;
+    public static String GIGA_CHAT_CLIENT_ID;
+    public static String GIGA_CHAT_SECRET;
 
     static {
         Properties props = new Properties();
@@ -36,6 +38,9 @@ public class Config {
             IAM_TOKEN = props.getProperty("yandex.cloud.apiKey");
             FOLDER_ID = props.getProperty("yandex.cloud.folderId");
             GOOGLE_CLOUD_TRANSLIT_PROJECT_ID = props.getProperty("google.cloud.translit.projectId");
+            GIGA_CHAT_KEY = props.getProperty("gigachat.api.pers");
+            GIGA_CHAT_CLIENT_ID = props.getProperty("gigachat.api.pers.id.client");
+            GIGA_CHAT_SECRET = props.getProperty("gigachat.api.pers.id.secret");
 
         } catch (IOException e) {
             log.error("Ошибка загрузки config.properties IOException: {}", e.getMessage());

@@ -95,7 +95,8 @@ public class PrivateChat implements ChatHandler {
             }
 
             // appealGPTChat(chatId, message);
-            appealDialogflow(chatId, message);
+            //appealDialogflow(chatId, message);
+            appealGigaChat(chatId, message);
             //appealYandexGPT(chatId, message);
 
         }
@@ -120,6 +121,22 @@ public class PrivateChat implements ChatHandler {
 
         // отправка инлайн клавиатуру
         // bot.sendInlineKeyboard(bot.getChatId(update));
+    }
+
+    private void appealGigaChat(Long chatId, String message) {
+        Message msg = messagePrints(chatId);
+
+        try {
+            String outGIGAChat = bot.getGigaChatclient().getGigaChatResponse(message);
+
+            Message messageOut = bot.sendEditMessageChatId(msg, String.valueOf(outGIGAChat));
+            if (messageOut == null) {
+                bot.sendEditMessageChatId(msg, EmojiParser.parseToUnicode("Что-то не так :scream:"));
+            }
+        } catch (Exception e) {
+            log.error("Что-то не так Dialogflow: {}", e.getMessage());
+            bot.sendEditMessageChatId(msg, EmojiParser.parseToUnicode("Что-то не так :scream:"));
+        }
     }
 
     /**

@@ -42,6 +42,7 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 import ru.alekseykonstantinov.interfaceImp.ChatHandler;
 import ru.alekseykonstantinov.service.ChatGptService;
 import ru.alekseykonstantinov.service.DialogflowConnector;
+import ru.alekseykonstantinov.service.GigaChatService;
 import ru.alekseykonstantinov.service.YandexGPTService;
 import ru.alekseykonstantinov.telegrambot.group.WebFrontGroup;
 import ru.alekseykonstantinov.telegrambot.privatechat.BusinessPrivetChat;
@@ -67,6 +68,7 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
     private final DialogflowConnector dialogflow;
     private final DialogflowConnector dialogflowTranslit;
     private final YandexGPTService yandexGPTClient;
+    private final GigaChatService gigaChatclient;
 
     public MyBotTelegram(String TOKEN) throws IOException {
         telegramClient = new OkHttpTelegramClient(TOKEN);
@@ -84,6 +86,8 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
                 getPathJSONToken("translate-pbis-1573793e18a6")
         );
         this.yandexGPTClient = new YandexGPTService(IAM_TOKEN, FOLDER_ID);
+
+        this.gigaChatclient = new GigaChatService();
         //clearBotCommands();
         logCurrentCommands();
         //setCommandsMenu();
@@ -146,6 +150,10 @@ public class MyBotTelegram implements LongPollingSingleThreadUpdateConsumer {
 
             sendMessageNewUser(chat, user);
         }
+    }
+
+    public GigaChatService getGigaChatclient() {
+        return gigaChatclient;
     }
 
     public YandexGPTService getYandexGPTClient() {
