@@ -9,6 +9,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
+import ru.alekseykonstantinov.utilites.BulkUUIDGenerator;
 import ru.alekseykonstantinov.utilites.UnsafeHttpClient;
 
 import java.io.IOException;
@@ -22,19 +23,22 @@ public class GigaChatService {
     private final String clientSecret = GIGA_CHAT_SECRET;
     private String accessToken;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private String RqUID;
 
     public GigaChatService() {
         this.accessToken = getAccessToken();
     }
 
     private String getAccessToken() {
+        RqUID = BulkUUIDGenerator.getUUID();
+
         try (CloseableHttpClient httpClient = UnsafeHttpClient.create()) {
             HttpPost httpPost = new HttpPost(gigaChatAuthUrl);
 
             httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
             httpPost.setHeader("Accept", "application/json");
             httpPost.setHeader("Authorization", "Basic " + GIGA_CHAT_KEY);
-            httpPost.setHeader("RqUID", "5114e616-79fc-4fe9-bd54-236aca62f61f");
+            httpPost.setHeader("RqUID", RqUID);
 
             String authRequest = String.format(
                     "scope=GIGACHAT_API_PERS&client_id=%s&client_secret=%s",
